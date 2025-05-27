@@ -80,4 +80,8 @@ public class DatabaseTratte {
             e.printStackTrace();
         }
     }
+    public void reset() {
+        tratte.clear();
+        tratteOsservabili.clear();
+    }
 }

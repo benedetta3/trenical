@@ -19,7 +19,7 @@ public class GestorePrenotazione implements Gestore {
         BigliettoDTO biglietto = richiesta.getBiglietto();
         ClienteDTO cliente = richiesta.getCliente();
 
-        if (biglietto == null || cliente == null) {
+        if (!richiesta.hasBiglietto() || !richiesta.hasCliente()) {
             return RispostaDTO.newBuilder()
                     .setEsito(false)
                     .setMessaggio("Dati mancanti per la prenotazione.")

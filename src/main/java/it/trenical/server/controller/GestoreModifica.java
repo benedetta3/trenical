@@ -14,7 +14,7 @@ public class GestoreModifica implements Gestore {
         ClienteDTO cliente = richiesta.getCliente();
         TrattaDTO tratta = richiesta.getTratta();
 
-        if (biglietto == null || cliente == null) {
+        if (!richiesta.hasBiglietto() || !richiesta.hasCliente() || !richiesta.hasTratta()) {
             return RispostaDTO.newBuilder()
                     .setEsito(false)
                     .setMessaggio("Dati mancanti per la modifica.")
@@ -72,7 +72,7 @@ public class GestoreModifica implements Gestore {
         // Se c'è un cambio di classe, calcoliamo la differenza
         if (!classeBiglietto.equals(classeTratta)) {
             if (classeTratta.equals("Prima") && classeBiglietto.equals("Seconda")) {
-                differenza = 20.0; // Ad esempio, la differenza fissa se si passa da Seconda a Prima
+                differenza = 15.0; // Ad esempio, la differenza fissa se si passa da Seconda a Prima
             } else if (classeTratta.equals("Seconda") && classeBiglietto.equals("Prima")) {
                 differenza = -15.0; // La differenza se si passa da Prima a Seconda
             }

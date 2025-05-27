@@ -14,7 +14,7 @@ public class GestoreAcquisto implements Gestore {
         ClienteDTO cliente = richiesta.getCliente();
         TrattaDTO tratta = richiesta.getTratta();
 
-        if (biglietto == null || cliente == null) {
+        if (!richiesta.hasCliente() || !richiesta.hasTratta() || !richiesta.hasBiglietto()) {
             return RispostaDTO.newBuilder()
                     .setEsito(false)
                     .setMessaggio("Dati mancanti per l'acquisto.")

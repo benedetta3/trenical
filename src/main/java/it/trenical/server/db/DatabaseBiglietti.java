@@ -71,4 +71,9 @@ public class DatabaseBiglietti {
             e.printStackTrace();
         }
     }
+
+    // Metodo usato solo nei test per pulire lo stato
+    public void reset() {
+        biglietti.clear();
+    }
 }
