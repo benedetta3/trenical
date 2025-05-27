@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package it.trenical.common.grpc;
+
+option java_multiple_files = true;
+
+// ENUM ESTERNO
+enum TipoRichiesta {
+  FILTRA = 0;
+  ACQUISTA = 1;
+  MODIFICA = 2;
+  CANCELLA = 3;
+  ISCRIVITI=4;
+  PROMOZIONE=5;
+  PRENOTA=6;
+  CONFERMA=7;
+}
+
+// MESSAGGI
+message ClienteDTO {
+  int32 id = 1;
+  string nome = 2;
+  string cognome = 3;
+  string email = 4;
+}
+
+message TrattaDTO {
+  int32 id = 1;
+  string stazionePartenza = 2;
+  string stazioneArrivo = 3;
+  string orarioPartenza = 4;
+  string orarioArrivo = 5;
+  string data = 6;
+  string tipoTreno = 7;
+  string classeServizio = 8;
+}
+
+message BigliettoDTO {
+  int32 id = 1;
+  TrattaDTO tratta = 2;
+  ClienteDTO cliente = 3;
+  double prezzo = 4;
+  string stato = 5;
+  string classeServizio = 6;
+}
+
+message RichiestaDTO {
+  TipoRichiesta tipo = 1;
+  TrattaDTO tratta = 2;
+  BigliettoDTO biglietto = 3;
+  ClienteDTO cliente = 4;
+  string messaggio = 5;
+}
+
+message RispostaDTO {
+  bool esito = 1;
+  string messaggio = 2;
+  repeated TrattaDTO tratte = 3;
+  repeated BigliettoDTO biglietti = 4;
+}
+
+// SERVIZIO
+service TrenicalService {
+  rpc inviaRichiesta (RichiestaDTO) returns (RispostaDTO);
+}
