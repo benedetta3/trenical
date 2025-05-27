@@ -13,7 +13,7 @@ public class GestoreIscriviti implements Gestore {
     public RispostaDTO gestisci(RichiestaDTO richiesta) {
         ClienteDTO cliente = richiesta.getCliente();
 
-        if (cliente == null) {
+        if (!richiesta.hasCliente()) {
             return RispostaDTO.newBuilder()
                     .setEsito(false)
                     .setMessaggio("Dati cliente mancanti.")

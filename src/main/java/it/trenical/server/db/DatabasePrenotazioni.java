@@ -40,4 +40,9 @@ public class DatabasePrenotazioni {
         prenotati.remove(id);
         osservatori.remove(id);  // Rimuove il cliente osservatore
     }
+
+    public void reset() {
+        prenotati.clear();
+        osservatori.clear();
+    }
 }

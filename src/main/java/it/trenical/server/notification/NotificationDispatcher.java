@@ -43,4 +43,11 @@ public class NotificationDispatcher implements Subject {
             System.out.println("Notifica per " + c.getNome() + ": " + messaggio);
         }
     }
+    public void reset() {
+        this.osservatori.clear();
+    }
+
+    public List<ClienteDTO> getClientiOsservatori() {
+        return new ArrayList<>(osservatori);
+    }
 }
