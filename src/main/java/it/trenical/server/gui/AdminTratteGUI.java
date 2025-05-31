@@ -1,13 +1,14 @@
 package it.trenical.server.gui;
 
+import it.trenical.common.grpc.TrattaDTO;
+import it.trenical.common.grpc.BigliettoDTO;
 import it.trenical.server.db.DatabaseTratte;
 import it.trenical.server.db.DatabaseBiglietti;
 import it.trenical.server.observer.TrattaObservable;
 import it.trenical.server.observer.ClienteOsservatore;
-import it.trenical.common.grpc.TrattaDTO;
-import it.trenical.common.grpc.BigliettoDTO;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
@@ -17,71 +18,91 @@ public class AdminTratteGUI extends JFrame {
     private JComboBox<Integer> trattaBox;
     private JTextField orarioPartField, orarioArrField, binarioField;
     private JComboBox<String> statoBox;
+    private JTable tabellaTratte;
 
     public AdminTratteGUI() {
         setTitle("Gestione Tratte");
-        setSize(400, 300);
+        setSize(900, 600);
         setLocationRelativeTo(null);
-        setLayout(new GridLayout(6, 2, 5, 5));
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        // ID Tratta
-        add(new JLabel("ID Tratta:"));
+        // --- TABELLA TRATTE ---
+        String[] colonne = {"ID", "Partenza", "Arrivo", "Orario Partenza", "Orario Arrivo", "Binario", "Stato"};
+        DefaultTableModel modelloTabella = new DefaultTableModel(colonne, 0) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        for (TrattaObservable t : DatabaseTratte.getInstance().getAll()) {
+            TrattaDTO tr = t.getTratta();
+            modelloTabella.addRow(new Object[]{
+                    tr.getId(),
+                    tr.getStazionePartenza(),
+                    tr.getStazioneArrivo(),
+                    tr.getOrarioPartenza(),
+                    tr.getOrarioArrivo(),
+                    tr.getBinario(),
+                    tr.getStato()
+            });
+        }
+
+        tabellaTratte = new JTable(modelloTabella);
+        JScrollPane scrollPane = new JScrollPane(tabellaTratte);
+        scrollPane.setPreferredSize(new Dimension(850, 250)); // limita altezza tabella
+
+        // --- FORM DI MODIFICA ---
+        JPanel panel = new JPanel(new GridLayout(6, 2, 5, 5));
+
+        panel.add(new JLabel("ID Tratta:"));
         trattaBox = new JComboBox<>();
         for (TrattaObservable t : DatabaseTratte.getInstance().getAll()) {
             trattaBox.addItem(t.getTratta().getId());
         }
-        add(trattaBox);
+        panel.add(trattaBox);
 
-        // Stato
-        add(new JLabel("Stato:"));
-        statoBox = new JComboBox<>();
-        statoBox.addItem(""); // default nullo
-        statoBox.addItem("ritardo");
-        statoBox.addItem("cancellato");
-        add(statoBox);
+        panel.add(new JLabel("Stato:"));
+        statoBox = new JComboBox<>(new String[]{"", "ritardo", "cancellato"});
+        panel.add(statoBox);
 
-        // Orario partenza
-        add(new JLabel("Orario Partenza:"));
+        panel.add(new JLabel("Orario Partenza:"));
         orarioPartField = new JTextField();
         orarioPartField.setEnabled(false);
-        add(orarioPartField);
+        panel.add(orarioPartField);
 
-        // Orario arrivo
-        add(new JLabel("Orario Arrivo:"));
+        panel.add(new JLabel("Orario Arrivo:"));
         orarioArrField = new JTextField();
         orarioArrField.setEnabled(false);
-        add(orarioArrField);
+        panel.add(orarioArrField);
 
-        // Binario
-        add(new JLabel("Binario:"));
+        panel.add(new JLabel("Binario:"));
         binarioField = new JTextField();
-        binarioField.setEnabled(true); // binario abilitato di default se stato è vuoto
-        add(binarioField);
+        binarioField.setEnabled(true);
+        panel.add(binarioField);
 
-        // Listener dinamico sulla tendina "Stato"
-        statoBox.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String stato = (String) statoBox.getSelectedItem();
-                boolean ritardo = "ritardo".equalsIgnoreCase(stato);
-                boolean cancellato = "cancellato".equalsIgnoreCase(stato);
-
-                orarioPartField.setEnabled(ritardo);
-                orarioArrField.setEnabled(ritardo);
-                binarioField.setEnabled(!cancellato);
-            }
-        });
-
-        // Pulsante di aggiornamento
         JButton aggiornaBtn = new JButton("Aggiorna e Notifica");
-        aggiornaBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                aggiornaTratta();
-            }
-        });
-        add(new JLabel(""));
-        add(aggiornaBtn);
+        aggiornaBtn.addActionListener(e -> aggiornaTratta());
+        panel.add(new JLabel(""));
+        panel.add(aggiornaBtn);
 
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        statoBox.addActionListener(e -> {
+            String stato = (String) statoBox.getSelectedItem();
+            boolean ritardo = "ritardo".equalsIgnoreCase(stato);
+            boolean cancellato = "cancellato".equalsIgnoreCase(stato);
+            orarioPartField.setEnabled(ritardo);
+            orarioArrField.setEnabled(ritardo);
+            binarioField.setEnabled(!cancellato);
+        });
+
+        // --- COMPOSIZIONE LAYOUT ---
+        JPanel contenitore = new JPanel();
+        contenitore.setLayout(new BoxLayout(contenitore, BoxLayout.Y_AXIS));
+        contenitore.add(scrollPane);
+        contenitore.add(Box.createVerticalStrut(20)); // spaziatura
+        contenitore.add(panel);
+
+        add(contenitore);
+
         setVisible(true);
     }
 
@@ -151,7 +172,8 @@ public class AdminTratteGUI extends JFrame {
             osservatore.update(aggiornata);
         }
 
-        JOptionPane.showMessageDialog(this,
-                "Tratta aggiornata con successo!");
+        JOptionPane.showMessageDialog(this, "Tratta aggiornata con successo!");
+        dispose();
+        new AdminTratteGUI(); // ricarica la GUI con la tabella aggiornata
     }
 }
