@@ -69,12 +69,6 @@ public class ClienteOsservatore implements TrattaObserver, NotificationObserver 
         }
     }
 
-    public static void notificaATuttiFedelta(String descrizionePromo, List<String> emailFedelta) {
-        for (String email : emailFedelta) {
-            inviaNotificaPromozione(email, descrizionePromo);
-        }
-    }
-
     public static void inviaNotificaPromozione(String email, String descrizionePromo) {
         String messaggio = "NUOVA PROMOZIONE DEDICATA\n\n" +
                 descrizionePromo + "\n\n" +

@@ -53,7 +53,7 @@ public class SimpleNotificationObserver implements NotificationObserver {
             isShowing = true;
 
             SwingUtilities.invokeLater(() -> {
-                JFrame frame = new JFrame("Aggiornamento Tratta");
+                JFrame frame = new JFrame("Aggiornamento");
                 frame.setSize(650, 450);
                 frame.setLocationRelativeTo(null);
                 frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -64,7 +64,7 @@ public class SimpleNotificationObserver implements NotificationObserver {
                 content.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
                 content.setBackground(Color.decode("#fdfdfd"));
 
-                JLabel title = new JLabel("Aggiornamento tratta ricevuto");
+                JLabel title = new JLabel("Aggiornamento ricevuto");
                 title.setFont(new Font("Segoe UI", Font.BOLD, 18));
                 title.setForeground(new Color(30, 60, 130));
                 title.setHorizontalAlignment(SwingConstants.CENTER);
