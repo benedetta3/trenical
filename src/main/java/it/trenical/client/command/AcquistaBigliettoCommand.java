@@ -4,19 +4,16 @@ import it.trenical.client.builder.BigliettoBuilder;
 import it.trenical.client.builder.RichiestaBuilder;
 import it.trenical.common.grpc.*;
 
-/**
- * Comando per acquistare un biglietto (con uso di builder pattern).
- */
 public class AcquistaBigliettoCommand implements Command {
 
     private final TrattaDTO tratta;
-    private final double prezzo;
     private final ClienteDTO cliente;
+    private final PromozioneDTO promozione;
 
-    public AcquistaBigliettoCommand(TrattaDTO tratta, double prezzo, ClienteDTO cliente) {
+    public AcquistaBigliettoCommand(TrattaDTO tratta, ClienteDTO cliente, PromozioneDTO promozione) {
         this.tratta = tratta;
-        this.prezzo = prezzo;
         this.cliente = cliente;
+        this.promozione = promozione;
     }
 
     @Override
@@ -24,15 +21,20 @@ public class AcquistaBigliettoCommand implements Command {
         BigliettoDTO biglietto = new BigliettoBuilder()
                 .setTratta(tratta)
                 .setCliente(cliente)
-                .setPrezzo(prezzo)
+                .setClasseServizio(tratta.getClasseServizio())
                 .setStato("ACQUISTATO")
                 .build();
 
-        return new RichiestaBuilder()
+        RichiestaBuilder builder = new RichiestaBuilder()
                 .setTipo(TipoRichiesta.ACQUISTA)
                 .setCliente(cliente)
                 .setTratta(tratta)
-                .setBiglietto(biglietto)
-                .build();
+                .setBiglietto(biglietto);
+
+        if (promozione != null) {
+            builder.setPromozione(promozione);
+        }
+
+        return builder.build();
     }
 }

@@ -4,24 +4,41 @@ package it.trenical.common.grpc;
 
 option java_multiple_files = true;
 
-// ENUM ESTERNO
 enum TipoRichiesta {
   FILTRA = 0;
   ACQUISTA = 1;
   MODIFICA = 2;
   CANCELLA = 3;
-  ISCRIVITI=4;
   PROMOZIONE=5;
   PRENOTA=6;
   CONFERMA=7;
+  VISUALIZZA_BIGLIETTI = 8;
+  VISUALIZZA_PRENOTAZIONI=9;
+  VISUALIZZA_PROMOZIONI=10;
+  REGISTRA_NOTIFICA=11;
+  NOTIFICA_CLIENT = 12;
 }
 
-// MESSAGGI
+message NotificaDTO {
+  string email = 1;
+  string messaggio = 2;
+  string timestamp = 3;
+}
+
 message ClienteDTO {
   int32 id = 1;
   string nome = 2;
   string cognome = 3;
   string email = 4;
+  bool isFedelta=5;
+  bool riceviPromo=6;
+}
+
+message PromozioneDTO {
+  string descrizione = 1;
+  double sconto = 2;
+  bool soloFedelta=3;
+  string classeStrategy=4;
 }
 
 message TrattaDTO {
@@ -33,6 +50,10 @@ message TrattaDTO {
   string data = 6;
   string tipoTreno = 7;
   string classeServizio = 8;
+  double prezzo = 9;
+  int32 postiDisponibili = 10;
+  int32 binario=11;
+  string stato=12;
 }
 
 message BigliettoDTO {
@@ -50,6 +71,8 @@ message RichiestaDTO {
   BigliettoDTO biglietto = 3;
   ClienteDTO cliente = 4;
   string messaggio = 5;
+  optional PromozioneDTO promozione = 6;
+  optional NotificaDTO notifica = 7;
 }
 
 message RispostaDTO {
@@ -57,6 +80,8 @@ message RispostaDTO {
   string messaggio = 2;
   repeated TrattaDTO tratte = 3;
   repeated BigliettoDTO biglietti = 4;
+  repeated PromozioneDTO promozioni = 5;
+  repeated NotificaDTO notifiche = 6;
 }
 
 // SERVIZIO

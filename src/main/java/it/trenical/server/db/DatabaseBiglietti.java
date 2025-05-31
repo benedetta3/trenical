@@ -7,11 +7,13 @@ import it.trenical.common.grpc.TrattaDTO;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DatabaseBiglietti {
 
     private static DatabaseBiglietti instance;
     private final List<BigliettoDTO> biglietti = new ArrayList<>();
+    private final AtomicInteger idGenerator = new AtomicInteger(1000);
 
     private DatabaseBiglietti() {}
 
@@ -22,53 +24,78 @@ public class DatabaseBiglietti {
         return instance;
     }
 
-    // Aggiungi un biglietto al database
     public void aggiungiBiglietto(BigliettoDTO biglietto) {
         biglietti.add(biglietto);
     }
 
-    // Verifica se il cliente ha già acquistato un biglietto per la stessa tratta
+    public void rimuoviBiglietto(int idDaRimuovere) {
+        for (int i = 0; i < biglietti.size(); i++) {
+            BigliettoDTO b = biglietti.get(i);
+            if (b.getId() == idDaRimuovere) {
+                biglietti.remove(i);
+                break;
+            }
+        }
+    }
+
+    public void aggiornaBiglietto(BigliettoDTO aggiornato) {
+        for (int i = 0; i < biglietti.size(); i++) {
+            if (biglietti.get(i).getId() == aggiornato.getId()) {
+                biglietti.set(i, aggiornato);
+                return;
+            }
+        }
+    }
+
+    public int generaNuovoId() {
+        return idGenerator.getAndIncrement();
+    }
+
     public boolean esisteBigliettoPer(ClienteDTO cliente, TrattaDTO tratta) {
         for (BigliettoDTO biglietto : biglietti) {
             if (biglietto.getCliente().getId() == cliente.getId() &&
                     biglietto.getTratta().getId() == tratta.getId()) {
-                return true;  // Il cliente ha già acquistato questo biglietto per la tratta
+                return true;
             }
         }
-        return false;  // Nessun biglietto trovato per questo cliente e tratta
+        return false;
     }
 
-    // Salvataggio dei biglietti in un file di testo (.txt)
-    public void salvaBigliettiSuFile() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("biglietti.txt"))) {
-            for (BigliettoDTO biglietto : biglietti) {
-                writer.write(biglietto.getId() + "|" + biglietto.getTratta().getId() + "|" + biglietto.getCliente().getId() + "|"
-                        + biglietto.getPrezzo() + "|" + biglietto.getStato() + "|" + biglietto.getClasseServizio());
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Caricamento dei biglietti dal file di testo (.txt)
-    public void caricaBigliettiDaFile() {
-        try (BufferedReader reader = new BufferedReader(new FileReader("biglietti.txt"))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] data = line.split("\\|");
-                BigliettoDTO biglietto = BigliettoDTO.newBuilder()
-                        .setId(Integer.parseInt(data[0]))
-                        .setTratta(TrattaDTO.newBuilder().setId(Integer.parseInt(data[1])).build())
-                        .setCliente(ClienteDTO.newBuilder().setId(Integer.parseInt(data[2])).build())
-                        .setPrezzo(Double.parseDouble(data[3]))
-                        .setStato(data[4])
-                        .setClasseServizio(data[5])
+    public List<BigliettoDTO> getBigliettiByCliente(ClienteDTO cliente) {
+        List<BigliettoDTO> risultato = new ArrayList<>();
+        DatabaseTratte dbTratte = DatabaseTratte.getInstance();
+        for (BigliettoDTO b : biglietti) {
+            if (b.hasCliente() && b.getCliente().getEmail().equalsIgnoreCase(cliente.getEmail())) {
+                TrattaDTO trattaCompleta = dbTratte.getTratta(b.getTratta().getId());
+                // Ricostruzione del biglietto con tratta aggiornata
+                BigliettoDTO aggiornato = BigliettoDTO.newBuilder(b)
+                        .setTratta(trattaCompleta)
                         .build();
-                aggiungiBiglietto(biglietto);  // Aggiungi il biglietto al sistema
+                risultato.add(aggiornato);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+        return risultato;
+    }
+
+    public List<BigliettoDTO> getBigliettiPerTratta(int idTratta) {
+        List<BigliettoDTO> risultato = new ArrayList<>();
+        for (BigliettoDTO b : biglietti) {
+            if (b.hasTratta() && b.getTratta().getId() == idTratta) {
+                risultato.add(b);
+            }
+        }
+        return risultato;
+    }
+
+    public void rimborsoPerTratta(int idTratta, ClienteDTO cliente) {
+        for (BigliettoDTO b : new ArrayList<>(biglietti)) {
+            if (b.getTratta().getId() == idTratta && b.getCliente().getEmail().equals(cliente.getEmail())) {
+                biglietti.remove(b);
+            }
+        }
+    }
+
+    public void reset() {
+        biglietti.clear();
     }
 }

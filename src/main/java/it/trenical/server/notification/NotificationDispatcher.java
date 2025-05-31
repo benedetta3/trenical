@@ -1,21 +1,24 @@
 package it.trenical.server.notification;
 
-import it.trenical.common.grpc.ClienteDTO;
-import it.trenical.server.observer.Observer;
-import it.trenical.server.observer.Subject;
+import it.trenical.client.notifiche.NotificationObserver;
+import it.trenical.common.grpc.PromozioneDTO;
+import it.trenical.server.observer.ClienteOsservatore;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * Classe che gestisce gli osservatori registrati (clienti fedeltà).
- */
-public class NotificationDispatcher implements Subject {
+public class NotificationDispatcher {
 
-    private final List<ClienteDTO> osservatori = new ArrayList<>();
     private static NotificationDispatcher instance;
 
-    private NotificationDispatcher() {}
+    private final Map<String, NotificationObserver> osservatori;      // notifica tratte
+    private final Map<String, NotificationObserver> observersPromo;   // notifica promozioni
+
+    private NotificationDispatcher() {
+        osservatori = new HashMap<>();
+        observersPromo = new HashMap<>();
+    }
 
     public static synchronized NotificationDispatcher getInstance() {
         if (instance == null) {
@@ -24,23 +27,41 @@ public class NotificationDispatcher implements Subject {
         return instance;
     }
 
-    @Override
-    public void attach(ClienteDTO cliente) {
-        if (!osservatori.contains(cliente)) {
-            osservatori.add(cliente);
+    // Notifica aggiornamento tratta
+    public void registra(String email, NotificationObserver osservatore) {
+        osservatori.putIfAbsent(email, osservatore);
+    }
+
+    public void notifica(String email, String messaggio) {
+        NotificationObserver o = osservatori.get(email);
+        if (o != null) {
+            o.aggiorna(messaggio);
         }
+        System.out.println("Notifica a " + email + ": " + messaggio);
     }
 
-    @Override
-    public void detach(ClienteDTO cliente) {
-        osservatori.remove(cliente);
+    public Set<String> getClientiRegistrati() {
+        return osservatori.keySet();
     }
 
-    @Override
-    public void notifyObservers(String messaggio) {
-        for (ClienteDTO c : osservatori) {
-            // In futuro: invio notifica vera (gRPC, socket, ecc.)
-            System.out.println("Notifica per " + c.getNome() + ": " + messaggio);
+    public void registraPerPromozioni(String email, NotificationObserver osservatore) {
+        observersPromo.putIfAbsent(email, osservatore);
+    }
+
+    public void notificaNuovaPromozioneFedelta(PromozioneDTO promo) {
+        System.out.println("Inizio invio promozione a " + observersPromo.size() + " clienti");
+
+        for (Map.Entry<String, NotificationObserver> entry : observersPromo.entrySet()) {
+            String email = entry.getKey();
+            NotificationObserver observer = entry.getValue();
+
+            if (observer != null) {
+                System.out.println("Inoltro promozione a " + email);
+                observer.aggiornaPromozione(promo);
+            } else {
+                System.out.println("Observer null per " + email);
+                ClienteOsservatore.inviaNotificaPromozione(email, promo.getDescrizione());
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package it.trenical.client.command;
 
+import it.trenical.client.builder.TrattaBuilder;
 import it.trenical.client.builder.RichiestaBuilder;
 import it.trenical.common.grpc.*;
 
@@ -22,17 +23,17 @@ public class FiltraTratteCommand implements Command {
 
     @Override
     public RichiestaDTO esegui() {
-        TrattaDTO tratta = TrattaDTO.newBuilder()
+        TrattaDTO tratta = new TrattaBuilder()
                 .setStazionePartenza(stazionePartenza)
                 .setStazioneArrivo(stazioneArrivo)
                 .setData(data)
                 .setTipoTreno(tipoTreno)
+                .setClasseServizio(classeServizio)
                 .build();
 
         return new RichiestaBuilder()
                 .setTipo(TipoRichiesta.FILTRA)
                 .setTratta(tratta)
-                .setMessaggio(classeServizio) // messaggio usato come filtro per classe
                 .build();
     }
 }

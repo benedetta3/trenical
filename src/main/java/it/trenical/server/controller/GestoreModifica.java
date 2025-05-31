@@ -2,81 +2,117 @@ package it.trenical.server.controller;
 
 import it.trenical.common.grpc.*;
 import it.trenical.server.db.DatabaseBiglietti;
+import it.trenical.server.db.DatabaseTratte;
+import it.trenical.server.payment.SimulatorePagamento;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 public class GestoreModifica implements Gestore {
 
     @Override
     public RispostaDTO gestisci(RichiestaDTO richiesta) {
-        BigliettoDTO biglietto = richiesta.getBiglietto();
-        ClienteDTO cliente = richiesta.getCliente();
-        TrattaDTO tratta = richiesta.getTratta();
-
-        if (biglietto == null || cliente == null) {
+        if (!richiesta.hasBiglietto() || !richiesta.hasCliente() || !richiesta.hasTratta()) {
             return RispostaDTO.newBuilder()
                     .setEsito(false)
                     .setMessaggio("Dati mancanti per la modifica.")
                     .build();
         }
 
-        // Controllo se il biglietto è in uno stato che permette la modifica
-        if (!biglietto.getStato().equals("ACQUISTATO")) {
+        BigliettoDTO biglietto = richiesta.getBiglietto();
+        ClienteDTO cliente = richiesta.getCliente();
+        TrattaDTO nuovaTratta = richiesta.getTratta();
+
+        DatabaseTratte dbTratte = DatabaseTratte.getInstance();
+        DatabaseBiglietti dbBiglietti = DatabaseBiglietti.getInstance();
+
+        if (!dbTratte.contiene(nuovaTratta.getId())) {
             return RispostaDTO.newBuilder()
                     .setEsito(false)
-                    .setMessaggio("Biglietto non modificabile in questo stato.")
+                    .setMessaggio("Tratta selezionata non disponibile.")
                     .build();
         }
 
-        // Calcolo della penale se la modifica avviene troppo vicina alla partenza
-        LocalDateTime orarioPartenza = LocalDateTime.parse(tratta.getOrarioPartenza());
-        LocalDateTime oraCorrente = LocalDateTime.now();
-        long oreAllaPartenza = Duration.between(oraCorrente, orarioPartenza).toHours();
+        TrattaDTO vecchiaTratta = dbTratte.getTratta(biglietto.getTratta().getId());
+        nuovaTratta = dbTratte.getTratta(nuovaTratta.getId());
 
-        double penale = calcolaPenale(oreAllaPartenza, biglietto.getPrezzo());
-        double differenzaTariffaria = calcolaDifferenzaTariffaria(biglietto.getClasseServizio(), tratta.getClasseServizio());
+        double prezzoVecchio = vecchiaTratta.getPrezzo();
+        double prezzoNuovo = nuovaTratta.getPrezzo();
 
-        // Calcola il nuovo prezzo
-        double nuovoPrezzo = biglietto.getPrezzo() + penale + differenzaTariffaria;
+        double penale = 0.0;
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            LocalDateTime partenza = LocalDateTime.parse(vecchiaTratta.getData() + " " + vecchiaTratta.getOrarioPartenza(), formatter);
+            Duration tempoResiduo = Duration.between(LocalDateTime.now(), partenza);
 
-        // Creiamo un nuovo biglietto con la penale e la differenza tariffaria
-        BigliettoDTO bigliettoModificato = BigliettoDTO.newBuilder(biglietto)
-                .setStato("MODIFICATO")
-                .setPrezzo(nuovoPrezzo)  // Nuovo prezzo con penale e differenza
+            if (tempoResiduo.toHours() < 24) {
+                penale = prezzoVecchio * 0.2;
+            }
+        } catch (Exception e) {
+            return RispostaDTO.newBuilder()
+                    .setEsito(false)
+                    .setMessaggio("Errore nel parsing della data di partenza.")
+                    .build();
+        }
+
+        double rimborso = 0.0;
+        double daPagare = 0.0;
+
+        if (prezzoNuovo > prezzoVecchio) {
+            daPagare += prezzoNuovo - prezzoVecchio;
+        } else {
+            rimborso = prezzoVecchio - prezzoNuovo;
+        }
+
+        if (penale > 0.0) {
+            daPagare += penale;
+        }
+
+        if (daPagare > 0.0) {
+            if (!SimulatorePagamento.effettuaPagamento(cliente, daPagare)) {
+                return RispostaDTO.newBuilder()
+                        .setEsito(false)
+                        .setMessaggio("Pagamento non autorizzato per un totale di " + daPagare + " €.")
+                        .build();
+            }
+        }
+
+        if (rimborso > 0.0) {
+            System.out.println("Rimborso di " + rimborso + "€ per il cliente " + cliente.getNome());
+        }
+
+        TrattaDTO aggiornataVecchia = TrattaDTO.newBuilder(vecchiaTratta)
+                .setPostiDisponibili(vecchiaTratta.getPostiDisponibili() + 1)
                 .build();
 
-        // Aggiungiamo il biglietto modificato al database
-        DatabaseBiglietti.getInstance().aggiungiBiglietto(bigliettoModificato);
+        TrattaDTO aggiornataNuova = TrattaDTO.newBuilder(nuovaTratta)
+                .setPostiDisponibili(nuovaTratta.getPostiDisponibili() - 1)
+                .build();
+
+        dbTratte.aggiornaTratta(aggiornataVecchia);
+        dbTratte.aggiornaTratta(aggiornataNuova);
+
+        BigliettoDTO bigliettoModificato = BigliettoDTO.newBuilder(biglietto)
+                .setTratta(aggiornataNuova)
+                .setPrezzo(prezzoNuovo)
+                .setClasseServizio(aggiornataNuova.getClasseServizio())
+                .build();
+
+        dbBiglietti.rimuoviBiglietto(biglietto.getId());
+        dbBiglietti.aggiungiBiglietto(bigliettoModificato);
+
+        StringBuilder messaggio = new StringBuilder("Modifica completata. ");
+        if (daPagare > 0.0) {
+            messaggio.append("Pagamento effettuato di ").append(String.format("%.2f", daPagare)).append(" €. ");
+        }
+        if (rimborso > 0.0) {
+            messaggio.append("Rimborso effettuato di ").append(String.format("%.2f", rimborso)).append(" €. ");
+        }
 
         return RispostaDTO.newBuilder()
                 .setEsito(true)
-                .setMessaggio("Biglietto modificato. Penale applicata: " + penale + " e differenza tariffaria: " + differenzaTariffaria)
+                .setMessaggio(messaggio.toString())
                 .addBiglietti(bigliettoModificato)
                 .build();
-    }
-
-    // Calcola la penale in base alle ore prima della partenza
-    private double calcolaPenale(long oreAllaPartenza, double prezzoBiglietto) {
-        if (oreAllaPartenza <= 24) {
-            // Penale 10% se la modifica avviene entro 24 ore dalla partenza
-            return prezzoBiglietto * 0.10;
-        }
-        return 0.0; // Nessuna penale se la modifica avviene oltre le 24 ore
-    }
-
-    // Calcola la differenza tariffaria se c'è un cambio di classe
-    private double calcolaDifferenzaTariffaria(String classeBiglietto, String classeTratta) {
-        double differenza = 0.0;
-
-        // Se c'è un cambio di classe, calcoliamo la differenza
-        if (!classeBiglietto.equals(classeTratta)) {
-            if (classeTratta.equals("Prima") && classeBiglietto.equals("Seconda")) {
-                differenza = 20.0; // Ad esempio, la differenza fissa se si passa da Seconda a Prima
-            } else if (classeTratta.equals("Seconda") && classeBiglietto.equals("Prima")) {
-                differenza = -15.0; // La differenza se si passa da Prima a Seconda
-            }
-        }
-        return differenza;
     }
 }

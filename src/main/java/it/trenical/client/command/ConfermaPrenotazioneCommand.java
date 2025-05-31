@@ -5,21 +5,26 @@ import it.trenical.common.grpc.*;
 
 public class ConfermaPrenotazioneCommand implements Command {
 
-    private final int idPrenotazione;
+    private final BigliettoDTO biglietto;
+    private final PromozioneDTO promozione;
 
-    public ConfermaPrenotazioneCommand(int idPrenotazione) {
-        this.idPrenotazione = idPrenotazione;
+    public ConfermaPrenotazioneCommand(BigliettoDTO biglietto) {
+        this(biglietto, null);
+    }
+
+    public ConfermaPrenotazioneCommand(BigliettoDTO biglietto, PromozioneDTO promozione) {
+        this.biglietto = biglietto;
+        this.promozione = promozione;
     }
 
     @Override
     public RichiestaDTO esegui() {
-        BigliettoDTO biglietto = BigliettoDTO.newBuilder()
-                .setId(idPrenotazione)
-                .build();
-
-        return new RichiestaBuilder()
+        RichiestaBuilder builder = new RichiestaBuilder()
                 .setTipo(TipoRichiesta.CONFERMA)
-                .setBiglietto(biglietto)
-                .build();
+                .setBiglietto(biglietto);
+        if (promozione != null) {
+            builder.setPromozione(promozione);
+        }
+        return builder.build();
     }
 }

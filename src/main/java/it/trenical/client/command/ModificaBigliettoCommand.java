@@ -3,20 +3,15 @@ package it.trenical.client.command;
 import it.trenical.client.builder.*;
 import it.trenical.common.grpc.*;
 
-/**
- * Comando per modificare un biglietto esistente.
- */
 public class ModificaBigliettoCommand implements Command {
 
     private final int idBiglietto;
     private final TrattaDTO nuovaTratta;
-    private final double nuovoPrezzo;
     private final ClienteDTO cliente;
 
-    public ModificaBigliettoCommand(int idBiglietto, TrattaDTO nuovaTratta, double nuovoPrezzo, ClienteDTO cliente) {
+    public ModificaBigliettoCommand(int idBiglietto, TrattaDTO nuovaTratta, ClienteDTO cliente) {
         this.idBiglietto = idBiglietto;
         this.nuovaTratta = nuovaTratta;
-        this.nuovoPrezzo = nuovoPrezzo;
         this.cliente = cliente;
     }
 
@@ -26,7 +21,8 @@ public class ModificaBigliettoCommand implements Command {
                 .setId(idBiglietto)
                 .setTratta(nuovaTratta)
                 .setCliente(cliente)
-                .setPrezzo(nuovoPrezzo)
+                .setPrezzo(nuovaTratta.getPrezzo())
+                .setClasseServizio(nuovaTratta.getClasseServizio())
                 .setStato("MODIFICATO")
                 .build();
 

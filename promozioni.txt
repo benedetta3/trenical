@@ -1,0 +1,3 @@
+Alta Velocità Estate|20.0|false|AltaVelocitaEstateStrategy
+Regionale Weekend|15.0|false|RegionaleWeekendStrategy
+Fedeltà Annuale|10.0|true|PromoTuttoLAnnoStrategy

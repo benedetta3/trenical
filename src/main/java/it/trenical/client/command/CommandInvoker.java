@@ -6,18 +6,24 @@ import it.trenical.common.grpc.TrenicalServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
-/**
- * Invoker che esegue un comando e invia la richiesta al server gRPC.
- */
+
 public class CommandInvoker {
 
+    private static CommandInvoker instance;
     private final TrenicalServiceGrpc.TrenicalServiceBlockingStub stub;
 
-    public CommandInvoker(String host, int port) {
+    private CommandInvoker(String host, int port) {
         ManagedChannel channel = ManagedChannelBuilder.forAddress(host, port)
                 .usePlaintext()
                 .build();
         this.stub = TrenicalServiceGrpc.newBlockingStub(channel);
+    }
+
+    public static synchronized CommandInvoker getInstance() {
+        if (instance == null) {
+            instance = new CommandInvoker("localhost", 50051);
+        }
+        return instance;
     }
 
     public RispostaDTO esegui(Command command) {
