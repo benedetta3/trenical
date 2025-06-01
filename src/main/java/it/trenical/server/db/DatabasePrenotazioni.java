@@ -27,7 +27,7 @@ public class DatabasePrenotazioni {
         return instance;
     }
 
-    public int generaNuovoId() {
+    public synchronized int generaNuovoId() {
         return idGenerator.getAndIncrement();
     }
 
@@ -37,19 +37,19 @@ public class DatabasePrenotazioni {
         postiRiservati.put(id, posti);
     }
 
-    public boolean contiene(int id) {
+    public synchronized boolean contiene(int id) {
         return prenotati.containsKey(id);
     }
 
-    public BigliettoDTO getPrenotazione(int id) {
+    public synchronized BigliettoDTO getPrenotazione(int id) {
         return prenotati.get(id);
     }
 
-    public ClienteDTO getClienteOsservatore(int id) {
+    public synchronized ClienteDTO getClienteOsservatore(int id) {
         return osservatori.get(id);
     }
 
-    public List<BigliettoDTO> getPrenotazioniPerEmail(String email) {
+    public synchronized List<BigliettoDTO> getPrenotazioniPerEmail(String email) {
         List<BigliettoDTO> risultato = new ArrayList<>();
         for (BigliettoDTO b : prenotati.values()) {
             if (b.hasCliente() && b.getCliente().getEmail().equalsIgnoreCase(email)) {
@@ -59,13 +59,13 @@ public class DatabasePrenotazioni {
         return risultato;
     }
 
-    public void rimuoviPrenotazione(int id) {
+    public synchronized void rimuoviPrenotazione(int id) {
         prenotati.remove(id);
         osservatori.remove(id);
         postiRiservati.remove(id);
     }
 
-    public void reset() {
+    public synchronized void reset() {
         prenotati.clear();
         osservatori.clear();
         postiRiservati.clear();

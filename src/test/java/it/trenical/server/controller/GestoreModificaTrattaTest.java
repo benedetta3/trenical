@@ -15,6 +15,7 @@ public class GestoreModificaTrattaTest {
 
     @BeforeEach
     public void setup() {
+        DatabaseTratte.getInstance().setPersistenzaAttiva(false);
         resetTratteFile();
 
         gestore = new GestoreModificaTratta();

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.*;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,6 +24,7 @@ public class GestoreModificaTest {
 
     @BeforeEach
     public void setUp() {
+        DatabaseTratte.getInstance().setPersistenzaAttiva(false);
         resetTratteFile();
 
         gestore = new GestoreModifica();
@@ -148,5 +150,80 @@ public class GestoreModificaTest {
 
         assertFalse(risposta.getEsito());
         assertEquals("Tratta selezionata non disponibile.", risposta.getMessaggio());
+    }
+
+    @Test
+    @Order(4)
+    public void testConcorrenzaSuModificaBiglietto() throws InterruptedException {
+        DatabaseTratte.getInstance().reset();
+        DatabaseBiglietti.getInstance().reset();
+        SimulatorePagamento.simulaAutorizzazione(true);
+
+        // Tratta iniziale per tutti
+        TrattaDTO trattaIniziale = TrattaDTO.newBuilder(trattaOriginale)
+                .setId(10)
+                .setPostiDisponibili(100)
+                .build();
+        DatabaseTratte.getInstance().aggiungiTratta(trattaIniziale);
+
+        // Tratta nuova con posti limitati
+        TrattaDTO trattaLimitata = TrattaDTO.newBuilder(trattaNuova)
+                .setId(20)
+                .setPostiDisponibili(3) // Solo 3 posti!
+                .build();
+        DatabaseTratte.getInstance().aggiungiTratta(trattaLimitata);
+
+        int tentativi = 10;
+        AtomicInteger riusciti = new AtomicInteger(0);
+        AtomicInteger falliti = new AtomicInteger(0);
+
+        Thread[] threads = new Thread[tentativi];
+
+        for (int i = 0; i < tentativi; i++) {
+            final int index = i;
+            threads[i] = new Thread(() -> {
+                ClienteDTO clienteX = ClienteDTO.newBuilder()
+                        .setId(index)
+                        .setNome("Cliente " + index)
+                        .setEmail("cliente" + index + "@mail.com")
+                        .build();
+
+                BigliettoDTO bigliettoX = BigliettoDTO.newBuilder()
+                        .setId(1000 + index)
+                        .setCliente(clienteX)
+                        .setTratta(trattaIniziale)
+                        .setPrezzo(60.0)
+                        .setStato("ACQUISTATO")
+                        .setClasseServizio("Seconda")
+                        .build();
+
+                DatabaseBiglietti.getInstance().aggiungiBiglietto(bigliettoX);
+
+                RichiestaDTO richiesta = RichiestaDTO.newBuilder()
+                        .setTipo(TipoRichiesta.MODIFICA)
+                        .setCliente(clienteX)
+                        .setBiglietto(bigliettoX)
+                        .setTratta(trattaLimitata)
+                        .build();
+
+                RispostaDTO risposta = gestore.gestisci(richiesta);
+
+                if (risposta.getEsito()) {
+                    riusciti.incrementAndGet();
+                } else {
+                    falliti.incrementAndGet();
+                }
+            });
+            threads[i].start();
+        }
+
+        for (Thread t : threads) {
+            t.join();
+        }
+
+        System.out.println("Modifiche riuscite: " + riusciti.get());
+        System.out.println("Modifiche fallite: " + falliti.get());
+
+        assertEquals(3, riusciti.get(), "Solo 3 modifiche devono andare a buon fine.");
     }
 }

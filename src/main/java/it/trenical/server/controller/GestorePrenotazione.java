@@ -15,7 +15,7 @@ public class GestorePrenotazione implements Gestore {
     private static final int SECONDI_AVVISO = 45;
 
     @Override
-    public RispostaDTO gestisci(RichiestaDTO richiesta) {
+    public synchronized RispostaDTO gestisci(RichiestaDTO richiesta) {
         ClienteDTO cliente = richiesta.getCliente();
         TrattaDTO tratta = richiesta.getTratta();
 

@@ -6,6 +6,10 @@ import it.trenical.server.db.DatabasePrenotazioni;
 import org.junit.jupiter.api.*;
 
 import java.io.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,6 +22,7 @@ public class GestorePrenotazioneTest {
 
     @BeforeEach
     public void setUp() {
+        DatabaseTratte.getInstance().setPersistenzaAttiva(false);
         resetTratteFile();
 
         DatabaseTratte.getInstance().reset();
@@ -144,4 +149,55 @@ public class GestorePrenotazioneTest {
         assertFalse(risposta.getEsito());
         assertEquals("Numero di prenotazioni non valido.", risposta.getMessaggio());
     }
+
+    @Test
+    @Order(6)
+    public void testConcorrenzaSuPostiDisponibili() throws InterruptedException {
+        // Imposta solo 3 posti disponibili
+        TrattaDTO trattaLimitata = TrattaDTO.newBuilder(tratta).setPostiDisponibili(3).build();
+        DatabaseTratte.getInstance().aggiornaTratta(trattaLimitata);
+
+        int threadCount = 10;
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+        CountDownLatch latch = new CountDownLatch(threadCount);
+        AtomicInteger successi = new AtomicInteger(0);
+        AtomicInteger fallimenti = new AtomicInteger(0);
+
+        for (int i = 0; i < threadCount; i++) {
+            final int id = i;
+            executor.submit(() -> {
+                ClienteDTO c = ClienteDTO.newBuilder()
+                        .setId(id)
+                        .setNome("Cliente " + id)
+                        .setEmail("cliente" + id + "@mail.com")
+                        .build();
+
+                RichiestaDTO richiesta = RichiestaDTO.newBuilder()
+                        .setCliente(c)
+                        .setTratta(tratta)
+                        .setMessaggio("1")
+                        .build();
+
+                RispostaDTO risposta = gestore.gestisci(richiesta);
+
+                if (risposta.getEsito()) {
+                    successi.incrementAndGet();
+                } else {
+                    fallimenti.incrementAndGet();
+                }
+
+                latch.countDown();
+            });
+        }
+
+        latch.await();
+        executor.shutdown();
+
+        System.out.println("Prenotazioni riuscite: " + successi.get());
+        System.out.println("Prenotazioni fallite: " + fallimenti.get());
+
+        assertEquals(3, successi.get(), "Devono essere riuscite solo 3 prenotazioni.");
+    }
+
 }

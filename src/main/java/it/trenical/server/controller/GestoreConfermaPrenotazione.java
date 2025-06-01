@@ -13,7 +13,7 @@ import java.util.List;
 public class GestoreConfermaPrenotazione implements Gestore {
 
     @Override
-    public RispostaDTO gestisci(RichiestaDTO richiesta) {
+    public synchronized RispostaDTO gestisci(RichiestaDTO richiesta) {
         BigliettoDTO richiesto = richiesta.getBiglietto();
 
         if (richiesto == null || !DatabasePrenotazioni.getInstance().contiene(richiesto.getId())) {

@@ -21,6 +21,7 @@ public class GestoreAcquistoTest {
 
     @BeforeEach
     public void setUp() {
+        DatabaseTratte.getInstance().setPersistenzaAttiva(false);
         resetTratteFile();
 
         gestoreAcquisto = new GestoreAcquisto();
@@ -178,5 +179,66 @@ public class GestoreAcquistoTest {
 
         assertFalse(risposta.getEsito());
         assertEquals("Dati cliente non validi: inserire nome e cognome e una email valida.", risposta.getMessaggio());
+    }
+
+    @Test
+    @Order(7)
+    public void testConcorrenzaSuPostiDisponibili() throws InterruptedException {
+        // Imposta 3 posti disponibili
+        tratta = TrattaDTO.newBuilder(tratta).setPostiDisponibili(3).build();
+        DatabaseTratte.getInstance().aggiornaTratta(tratta);
+
+        int numClienti = 10; // 10 tentativi di acquisto concorrenti
+        Thread[] threads = new Thread[numClienti];
+        RispostaDTO[] risposte = new RispostaDTO[numClienti];
+
+        for (int i = 0; i < numClienti; i++) {
+            final int index = i;
+            threads[i] = new Thread(() -> {
+                ClienteDTO clienteTemp = ClienteDTO.newBuilder()
+                        .setId(100 + index)
+                        .setNome("Cliente " + index)
+                        .setEmail("cliente" + index + "@mail.com")
+                        .build();
+
+                BigliettoDTO bigliettoTemp = BigliettoDTO.newBuilder()
+                        .setCliente(clienteTemp)
+                        .setTratta(tratta)
+                        .setPrezzo(50.0)
+                        .setStato("DA_PAGARE")
+                        .setClasseServizio("1A")
+                        .build();
+
+                RichiestaDTO richiesta = RichiestaDTO.newBuilder()
+                        .setTipo(TipoRichiesta.ACQUISTA)
+                        .setCliente(clienteTemp)
+                        .setTratta(tratta)
+                        .setBiglietto(bigliettoTemp)
+                        .build();
+
+                risposte[index] = gestoreAcquisto.gestisci(richiesta);
+            });
+            threads[i].start();
+        }
+
+        for (Thread t : threads) {
+            t.join();
+        }
+
+        int successi = 0;
+        int fallimenti = 0;
+        for (RispostaDTO r : risposte) {
+            if (r != null && r.getEsito()) {
+                successi++;
+            } else {
+                fallimenti++;
+            }
+        }
+
+        System.out.println("Acquisti riusciti: " + successi);
+        System.out.println("Acquisti falliti: " + fallimenti);
+
+        assertEquals(3, successi, "Devono essere riusciti solo 3 acquisti.");
+        assertEquals(7, fallimenti, "Devono fallire i restanti 7 tentativi.");
     }
 }

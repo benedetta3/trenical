@@ -15,6 +15,7 @@ public class DatabaseTratte {
 
     private final List<TrattaDTO> tratte = new ArrayList<>();
     private final Map<Integer, TrattaObservable> tratteOsservabili = new HashMap<>();
+    private boolean persistenzaAttiva = true; // di default attiva
 
     private DatabaseTratte() {}
 
@@ -25,24 +26,24 @@ public class DatabaseTratte {
         return instance;
     }
 
-    public void aggiungiTratta(TrattaDTO tratta) {
+    public synchronized void aggiungiTratta(TrattaDTO tratta) {
         tratte.add(tratta);
         tratteOsservabili.put(tratta.getId(), new TrattaObservable(tratta));
     }
 
-    public boolean contiene(int idTratta) {
+    public synchronized boolean contiene(int idTratta) {
         return tratteOsservabili.containsKey(idTratta);
     }
 
-    public List<TrattaDTO> getTutteLeTratte() {
+    public synchronized List<TrattaDTO> getTutteLeTratte() {
         return tratte;
     }
 
-    public TrattaObservable getTrattaObservable(int idTratta) {
+    public synchronized TrattaObservable getTrattaObservable(int idTratta) {
         return tratteOsservabili.get(idTratta);
     }
 
-    public void caricaTratteDaFile() {
+    public synchronized void caricaTratteDaFile() {
         try (BufferedReader reader = new BufferedReader(new FileReader("tratte.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -86,7 +87,7 @@ public class DatabaseTratte {
         }
     }
 
-    public TrattaDTO getTratta(int idTratta) {
+    public synchronized TrattaDTO getTratta(int idTratta) {
         TrattaObservable observable = tratteOsservabili.get(idTratta);
         if (observable != null) {
             return observable.getTratta();
@@ -94,7 +95,7 @@ public class DatabaseTratte {
         return null;
     }
 
-    public void aggiornaTratta(TrattaDTO nuovaTratta) {
+    public synchronized void aggiornaTratta(TrattaDTO nuovaTratta) {
         for (int i = 0; i < tratte.size(); i++) {
             if (tratte.get(i).getId() == nuovaTratta.getId()) {
                 tratte.set(i, nuovaTratta);
@@ -106,7 +107,7 @@ public class DatabaseTratte {
             }
         }
 
-        List<BigliettoDTO> biglietti = DatabaseBiglietti.getInstance().getBigliettiPerTratta(nuovaTratta.getId());
+        List<BigliettoDTO> biglietti =new ArrayList<>(DatabaseBiglietti.getInstance().getBigliettiPerTratta(nuovaTratta.getId()));
         Set<String> emailNotificate = new HashSet<>();
 
         for (BigliettoDTO b : biglietti) {
@@ -156,16 +157,17 @@ public class DatabaseTratte {
         salvaTutteSuFile();
     }
 
-    public List<TrattaObservable> getAll() {
+    public synchronized List<TrattaObservable> getAll() {
         return new ArrayList<>(tratteOsservabili.values());
     }
 
-    public void reset() {
+    public synchronized void reset() {
         tratte.clear();
         tratteOsservabili.clear();
     }
 
     public void salvaTutteSuFile() {
+        if (!persistenzaAttiva) return;
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("tratte.txt"))) {
             for (TrattaDTO t : tratte) {
                 String riga = t.getId() + "|" +
@@ -185,5 +187,9 @@ public class DatabaseTratte {
         } catch (IOException e) {
             System.err.println("Errore nel salvataggio delle tratte: " + e.getMessage());
         }
+    }
+
+    public void setPersistenzaAttiva(boolean attiva) {
+        this.persistenzaAttiva = attiva;
     }
 }

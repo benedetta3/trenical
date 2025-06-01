@@ -7,6 +7,10 @@ import it.trenical.server.db.DatabasePromozioni;
 import org.junit.jupiter.api.*;
 
 import java.io.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -114,5 +118,66 @@ public class GestoreConfermaPrenotazioneTest {
 
         assertFalse(risposta.getEsito());
         assertEquals("Prenotazione non trovata o già scaduta.", risposta.getMessaggio());
+    }
+
+    @Test
+    @Order(4)
+    public void testConcorrenzaSuConfermaPrenotazioni() throws InterruptedException {
+        int numeroPrenotazioni = 5; // posti disponibili nella tratta
+        int tentativi = 10;
+
+        // Preparazione prenotazioni concorrenti
+        for (int i = 0; i < numeroPrenotazioni; i++) {
+            ClienteDTO clienteTemp = ClienteDTO.newBuilder()
+                    .setId(100 + i)
+                    .setNome("Cliente " + i)
+                    .setEmail("cliente" + i + "@mail.com")
+                    .build();
+
+            BigliettoDTO prenotatoTemp = BigliettoDTO.newBuilder()
+                    .setId(9000 + i)
+                    .setCliente(clienteTemp)
+                    .setTratta(tratta)
+                    .setPrezzo(45.50)
+                    .setStato("PRENOTATO")
+                    .setClasseServizio("2A")
+                    .build();
+
+            DatabasePrenotazioni.getInstance().aggiungiPrenotazione(9000 + i, prenotatoTemp, clienteTemp, 1);
+        }
+
+        ExecutorService executor = Executors.newFixedThreadPool(tentativi);
+        CountDownLatch latch = new CountDownLatch(tentativi);
+        AtomicInteger successi = new AtomicInteger();
+        AtomicInteger fallimenti = new AtomicInteger();
+
+        for (int i = 0; i < tentativi; i++) {
+            int idPrenotazione = 9000 + (i % numeroPrenotazioni); // Alcuni thread useranno stesse prenotazioni
+
+            executor.submit(() -> {
+                RichiestaDTO richiesta = RichiestaDTO.newBuilder()
+                        .setBiglietto(BigliettoDTO.newBuilder().setId(idPrenotazione).build())
+                        .build();
+
+                RispostaDTO risposta = gestore.gestisci(richiesta);
+
+                if (risposta.getEsito()) {
+                    successi.incrementAndGet();
+                } else {
+                    fallimenti.incrementAndGet();
+                }
+
+                latch.countDown();
+            });
+        }
+
+        latch.await();
+        executor.shutdown();
+
+        System.out.println("Conferme riuscite: " + successi.get());
+        System.out.println("Conferme fallite: " + fallimenti.get());
+
+        // Solo 5 conferme possono riuscire, massimo 5 biglietti presenti nel DB
+        assertEquals(numeroPrenotazioni, successi.get(), "Devono essere riuscite solo " + numeroPrenotazioni + " conferme.");
     }
 }

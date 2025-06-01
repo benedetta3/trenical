@@ -40,7 +40,7 @@ public class TrattaObservable implements TrattaSubject {
     }
 
     public TrattaDTO getTratta() {
-        return this.tratta;
+        return this.tratta.toBuilder().build();
     }
 
     public String getStato() {

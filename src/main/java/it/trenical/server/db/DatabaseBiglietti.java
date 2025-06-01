@@ -24,11 +24,11 @@ public class DatabaseBiglietti {
         return instance;
     }
 
-    public void aggiungiBiglietto(BigliettoDTO biglietto) {
+    public synchronized void aggiungiBiglietto(BigliettoDTO biglietto) {
         biglietti.add(biglietto);
     }
 
-    public void rimuoviBiglietto(int idDaRimuovere) {
+    public synchronized void rimuoviBiglietto(int idDaRimuovere) {
         for (int i = 0; i < biglietti.size(); i++) {
             BigliettoDTO b = biglietti.get(i);
             if (b.getId() == idDaRimuovere) {
@@ -38,7 +38,7 @@ public class DatabaseBiglietti {
         }
     }
 
-    public void aggiornaBiglietto(BigliettoDTO aggiornato) {
+    public synchronized void aggiornaBiglietto(BigliettoDTO aggiornato) {
         for (int i = 0; i < biglietti.size(); i++) {
             if (biglietti.get(i).getId() == aggiornato.getId()) {
                 biglietti.set(i, aggiornato);
@@ -47,11 +47,11 @@ public class DatabaseBiglietti {
         }
     }
 
-    public int generaNuovoId() {
+    public synchronized int generaNuovoId() {
         return idGenerator.getAndIncrement();
     }
 
-    public boolean esisteBigliettoPer(ClienteDTO cliente, TrattaDTO tratta) {
+    public synchronized boolean esisteBigliettoPer(ClienteDTO cliente, TrattaDTO tratta) {
         for (BigliettoDTO biglietto : biglietti) {
             if (biglietto.getCliente().getId() == cliente.getId() &&
                     biglietto.getTratta().getId() == tratta.getId()) {
@@ -61,7 +61,7 @@ public class DatabaseBiglietti {
         return false;
     }
 
-    public List<BigliettoDTO> getBigliettiByCliente(ClienteDTO cliente) {
+    public synchronized List<BigliettoDTO> getBigliettiByCliente(ClienteDTO cliente) {
         List<BigliettoDTO> risultato = new ArrayList<>();
         DatabaseTratte dbTratte = DatabaseTratte.getInstance();
         for (BigliettoDTO b : biglietti) {
@@ -77,17 +77,19 @@ public class DatabaseBiglietti {
         return risultato;
     }
 
-    public List<BigliettoDTO> getBigliettiPerTratta(int idTratta) {
+    public synchronized List<BigliettoDTO> getBigliettiPerTratta(int idTratta) {
         List<BigliettoDTO> risultato = new ArrayList<>();
-        for (BigliettoDTO b : biglietti) {
-            if (b.hasTratta() && b.getTratta().getId() == idTratta) {
-                risultato.add(b);
+        synchronized (this) {
+            for (BigliettoDTO b : biglietti) {
+                if (b.getTratta().getId() == idTratta) {
+                    risultato.add(b);
+                }
             }
         }
         return risultato;
     }
 
-    public void rimborsoPerTratta(int idTratta, ClienteDTO cliente) {
+    public synchronized void rimborsoPerTratta(int idTratta, ClienteDTO cliente) {
         for (BigliettoDTO b : new ArrayList<>(biglietti)) {
             if (b.getTratta().getId() == idTratta && b.getCliente().getEmail().equals(cliente.getEmail())) {
                 biglietti.remove(b);
@@ -95,7 +97,7 @@ public class DatabaseBiglietti {
         }
     }
 
-    public void reset() {
+    public synchronized void reset() {
         biglietti.clear();
     }
 }

@@ -14,7 +14,7 @@ import java.util.List;
 public class GestoreAcquisto implements Gestore {
 
     @Override
-    public RispostaDTO gestisci(RichiestaDTO richiesta) {
+    public synchronized RispostaDTO gestisci(RichiestaDTO richiesta) {
         BigliettoDTO biglietto = richiesta.getBiglietto();
         ClienteDTO cliente = richiesta.getCliente();
         TrattaDTO tratta = richiesta.getTratta();
@@ -50,6 +50,12 @@ public class GestoreAcquisto implements Gestore {
                     .build();
         }
 
+        // Decremento posti
+        TrattaDTO trattaAggiornata = TrattaDTO.newBuilder(trattaSalvata)
+                .setPostiDisponibili(trattaSalvata.getPostiDisponibili() - 1)
+                .build();
+        dbTratte.aggiornaTratta(trattaAggiornata);
+
         if (!SimulatorePagamento.autorizzaPagamento()) {
             return RispostaDTO.newBuilder()
                     .setEsito(false)
@@ -57,19 +63,15 @@ public class GestoreAcquisto implements Gestore {
                     .build();
         }
 
-        TrattaDTO trattaAggiornata = TrattaDTO.newBuilder(trattaSalvata)
-                .setPostiDisponibili(trattaSalvata.getPostiDisponibili() - 1)
-                .build();
-        dbTratte.aggiornaTratta(trattaAggiornata);
-
-        double prezzoOriginale = trattaSalvata.getPrezzo();
+        double prezzoOriginale = trattaAggiornata.getPrezzo();
         double prezzoFinale = prezzoOriginale;
         List<PromozioneDTO> promozioniApplicate = new ArrayList<>();
 
         for (PromozioneDTO promo : DatabasePromozioni.getInstance().getTutteLePromozioni()) {
-            PromozioneStrategy strategia = PromozioneStrategyFactory.getInstance().selezionaStrategia(promo, trattaSalvata, cliente);
-            if (strategia.isApplicabile(trattaSalvata, cliente)) {
-                prezzoFinale = strategia.calcolaPrezzo(trattaSalvata);
+            PromozioneStrategy strategia = PromozioneStrategyFactory.getInstance()
+                    .selezionaStrategia(promo, trattaAggiornata, cliente);
+            if (strategia.isApplicabile(trattaAggiornata, cliente)) {
+                prezzoFinale = strategia.calcolaPrezzo(trattaAggiornata);
                 promozioniApplicate.add(promo);
             }
         }
@@ -91,9 +93,9 @@ public class GestoreAcquisto implements Gestore {
 
         if (!promozioniApplicate.isEmpty()) {
             messaggio.append("\n\nPromozioni applicate:");
-            for (int i = 0; i < promozioniApplicate.size(); i++) {
-                PromozioneDTO p = promozioniApplicate.get(i);
-                messaggio.append("\n- ").append(p.getDescrizione()).append(" (").append((int) p.getSconto()).append("%)");
+            for (PromozioneDTO p : promozioniApplicate) {
+                messaggio.append("\n- ").append(p.getDescrizione())
+                        .append(" (").append((int) p.getSconto()).append("%)");
             }
         }
 
@@ -105,7 +107,7 @@ public class GestoreAcquisto implements Gestore {
                 .build();
     }
 
-    private boolean isClienteValido(ClienteDTO cliente) {
+    private synchronized boolean isClienteValido(ClienteDTO cliente) {
         String nome = cliente.getNome() == null ? "" : cliente.getNome().trim();
         String email = cliente.getEmail() == null ? "" : cliente.getEmail().trim();
         return nome.split("\\s+").length >= 2 && email.contains("@");
