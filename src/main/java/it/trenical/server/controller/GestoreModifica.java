@@ -9,7 +9,6 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 public class GestoreModifica implements Gestore {
-
     @Override
     public RispostaDTO gestisci(RichiestaDTO richiesta) {
         if (!richiesta.hasBiglietto() || !richiesta.hasCliente() || !richiesta.hasTratta()) {
@@ -44,7 +43,7 @@ public class GestoreModifica implements Gestore {
                         .build();
             }
 
-            double prezzoVecchio = vecchiaTratta.getPrezzo();
+            double prezzoVecchio = biglietto.getPrezzo();
             double prezzoNuovo = nuovaTratta.getPrezzo();
 
             double penale = 0.0;
@@ -63,17 +62,17 @@ public class GestoreModifica implements Gestore {
                         .build();
             }
 
-            double rimborso = 0.0;
+            double differenza = prezzoNuovo - prezzoVecchio;
+
             double daPagare = 0.0;
+            double rimborso = 0.0;
 
-            if (prezzoNuovo > prezzoVecchio) {
-                daPagare += prezzoNuovo - prezzoVecchio;
+            double totale = differenza + penale;
+
+            if (totale > 0) {
+                daPagare = totale;
             } else {
-                rimborso = prezzoVecchio - prezzoNuovo;
-            }
-
-            if (penale > 0.0) {
-                daPagare += penale;
+                rimborso = -totale;
             }
 
             if (daPagare > 0.0) {
@@ -110,12 +109,27 @@ public class GestoreModifica implements Gestore {
                 dbBiglietti.aggiungiBiglietto(bigliettoModificato);
             }
 
-            StringBuilder messaggio = new StringBuilder("Modifica completata. ");
+            StringBuilder messaggio = new StringBuilder("Modifica completata.\n\n");
+            messaggio.append("Nuova Tratta:\n")
+                    .append("Partenza: ").append(nuovaTratta.getStazionePartenza()).append(" → ").append(nuovaTratta.getStazioneArrivo()).append("\n")
+                    .append("Data: ").append(nuovaTratta.getData()).append("\n")
+                    .append("Orario: ").append(nuovaTratta.getOrarioPartenza()).append(" - ").append(nuovaTratta.getOrarioArrivo()).append("\n")
+                    .append("Classe: ").append(nuovaTratta.getClasseServizio()).append("\n\n")
+                    .append("Dettagli Economici:\n")
+                    .append("Prezzo Originale: ").append(String.format("%.2f", prezzoVecchio)).append(" €\n")
+                    .append("Prezzo Nuovo: ").append(String.format("%.2f", prezzoNuovo)).append(" €\n")
+                    .append("Differenza: ").append(differenza >= 0 ? "+" : "").append(String.format("%.2f", differenza)).append(" €\n");
+
+            if (penale > 0.0) {
+                messaggio.append("Penale (modifica < 24h): ").append(String.format("%.2f", penale)).append(" €\n");
+            }
+
+            messaggio.append("\nTOTALE:\n");
             if (daPagare > 0.0) {
-                messaggio.append("Pagamento effettuato di ").append(String.format("%.2f", daPagare)).append(" €. ");
+                messaggio.append("Pagamento effettuato di ").append(String.format("%.2f", daPagare)).append(" €.\n");
             }
             if (rimborso > 0.0) {
-                messaggio.append("Rimborso effettuato di ").append(String.format("%.2f", rimborso)).append(" €. ");
+                messaggio.append("Rimborso effettuato di ").append(String.format("%.2f", rimborso)).append(" €.\n");
             }
 
             return RispostaDTO.newBuilder()

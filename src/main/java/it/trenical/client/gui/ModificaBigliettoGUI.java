@@ -179,14 +179,12 @@ public class ModificaBigliettoGUI extends JFrame {
         double rimborso = 0.0;
         double daPagare = 0.0;
 
-        if (prezzoNuovo > prezzoVecchio) {
-            daPagare += prezzoNuovo - prezzoVecchio;
-        } else {
-            rimborso = prezzoVecchio - prezzoNuovo;
-        }
+        double totale = differenzaPrezzo + penaleStimata;
 
-        if (penaleStimata > 0.0) {
-            daPagare += penaleStimata;
+        if (totale > 0) {
+            daPagare = totale;
+        } else {
+            rimborso = -totale;
         }
 
         StringBuilder riepilogo = new StringBuilder("Riepilogo Modifica:\n\n");
@@ -213,18 +211,19 @@ public class ModificaBigliettoGUI extends JFrame {
             riepilogo.append("Rimborso: ").append(String.format("%.2f", rimborso)).append(" €\n");
         }
 
-        int conferma = JOptionPane.showConfirmDialog(this, riepilogo.toString(), "Conferma Modifica", JOptionPane.YES_NO_OPTION);
+        int conferma = JOptionPane.showConfirmDialog(this,
+                "Vuoi procedere con la modifica alla nuova tratta selezionata?",
+                "Conferma Modifica",
+                JOptionPane.YES_NO_OPTION);
         if (conferma != JOptionPane.YES_OPTION) {
             return false;
         }
 
-        if (daPagare > 0) {
-            if (!gestisciPagamento(daPagare)) {
-                return false;
-            }
-        }
+        TrattaDTO trattaFake = TrattaDTO.newBuilder(nuovaTratta)
+                .setPrezzo(prezzoVecchio)
+                .build();
 
-        ModificaBigliettoCommand comando = new ModificaBigliettoCommand(idBiglietto, nuovaTratta, cliente);
+        ModificaBigliettoCommand comando = new ModificaBigliettoCommand(idBiglietto, trattaFake, cliente);
         RispostaDTO rispostaFinale = CommandInvoker.getInstance().esegui(comando);
 
         String messaggio = rispostaFinale.getMessaggio();
@@ -249,29 +248,5 @@ public class ModificaBigliettoGUI extends JFrame {
             JOptionPane.showMessageDialog(this, messaggio, "Errore", JOptionPane.ERROR_MESSAGE);
             return false;
         }
-    }
-
-    private boolean gestisciPagamento(double importo) {
-        Object[] opzioni = {"Carta di Credito", "Portafoglio Digitale", "Bancomat", "Annulla"};
-        String scelta = (String) JOptionPane.showInputDialog(
-                this,
-                "Importo da pagare: " + String.format("%.2f", importo) + " €\n\nSeleziona il metodo di pagamento:",
-                "Metodo di Pagamento",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                opzioni,
-                opzioni[0]
-        );
-
-        if (scelta == null || scelta.equals("Annulla")) {
-            return false;
-        }
-
-        JOptionPane.showMessageDialog(this,
-                "Pagamento di " + String.format("%.2f", importo) + " € effettuato con: " + scelta,
-                "Pagamento Confermato",
-                JOptionPane.INFORMATION_MESSAGE);
-
-        return true;
     }
 }

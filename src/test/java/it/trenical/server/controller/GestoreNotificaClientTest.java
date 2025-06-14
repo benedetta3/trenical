@@ -65,7 +65,7 @@ public class GestoreNotificaClientTest {
         RispostaDTO risposta = gestore.gestisci(richiesta);
 
         assertTrue(risposta.getEsito());
-        assertEquals("Nessuna notifica pending", risposta.getMessaggio());
+        assertEquals("Nessuna notifica", risposta.getMessaggio());
     }
 
     @Test

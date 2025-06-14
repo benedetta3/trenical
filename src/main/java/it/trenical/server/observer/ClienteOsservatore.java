@@ -50,14 +50,12 @@ public class ClienteOsservatore implements TrattaObserver, NotificationObserver 
         messaggio += "Binario: " + trattaAggiornata.getBinario() + "\n\n" +
                 "Controlla i tuoi biglietti per maggiori dettagli.";
 
-        System.out.println("Invio notifica al client: " + cliente.getEmail());
         inviaNotificaViaGRPC(cliente.getEmail(), messaggio);
     }
 
     private void inviaNotificaViaGRPC(String email, String messaggio) {
         synchronized (notificheInCoda) {
             notificheInCoda.computeIfAbsent(email, k -> new ArrayList<>()).add(messaggio);
-            System.out.println("Notifica salvata per " + email + ": " + messaggio.substring(0, Math.min(50, messaggio.length())) + "...");
         }
     }
 
@@ -76,7 +74,6 @@ public class ClienteOsservatore implements TrattaObserver, NotificationObserver 
 
         synchronized (notificheInCoda) {
             notificheInCoda.computeIfAbsent(email, k -> new ArrayList<>()).add(messaggio);
-            System.out.println("Promo salvata per " + email + ": " + messaggio);
         }
     }
 

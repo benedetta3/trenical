@@ -12,9 +12,6 @@ public class SimulatorePagamento {
         return autorizzato;
     }
 
-    public static boolean effettuaPagamento(it.trenical.common.grpc.ClienteDTO cliente, double importo) {
-        System.out.println("Simulazione pagamento: " + importo + "€ da parte di " + cliente.getNome());
-        return autorizzato;
-    }
+    public static boolean effettuaPagamento(it.trenical.common.grpc.ClienteDTO cliente, double importo) {return autorizzato;}
 
 }

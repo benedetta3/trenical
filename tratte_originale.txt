@@ -1,7 +1,7 @@
-1|Milano|Roma|07:30|12:00|2025-06-15|Alta Velocità|1|90.00|20|1
-2|Milano|Roma|07:30|11:30|2025-06-15|Alta Velocità|2|65.00|43|1
-3|Milano|Roma|08:45|12:45|2025-06-15|Regionale|1|60.00|39|2
-4|Milano|Roma|08:45|12:45|2025-06-15|Regionale|2|40.00|40|2
+1|Milano|Roma|07:30|11:30|2025-06-25|Alta Velocità|1|90.00|20|1
+2|Milano|Roma|07:30|11:30|2025-06-25|Alta Velocità|2|65.00|43|1
+3|Milano|Roma|08:45|12:45|2025-06-25|Regionale|1|60.00|39|2
+4|Milano|Roma|08:45|12:45|2025-06-25|Regionale|2|40.00|40|2
 5|Napoli|Torino|09:00|14:00|2025-07-01|Alta Velocità|1|95.00|50|2
 6|Napoli|Torino|09:00|14:00|2025-07-01|Alta Velocità|2|70.00|50|5
 7|Napoli|Torino|10:00|15:00|2025-07-01|Regionale|1|55.00|40|1

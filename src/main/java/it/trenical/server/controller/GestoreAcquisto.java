@@ -70,7 +70,8 @@ public class GestoreAcquisto implements Gestore {
             PromozioneStrategy strategia = PromozioneStrategyFactory.getInstance()
                     .selezionaStrategia(promo, trattaAggiornata, cliente);
             if (strategia.isApplicabile(trattaAggiornata, cliente)) {
-                prezzoFinale = strategia.calcolaPrezzo(trattaAggiornata);
+                TrattaDTO fintaTratta = TrattaDTO.newBuilder(trattaAggiornata).setPrezzo(prezzoFinale).build();
+                prezzoFinale = strategia.calcolaPrezzo(fintaTratta); // usa prezzoFinale corrente
                 promozioniApplicate.add(promo);
             }
         }

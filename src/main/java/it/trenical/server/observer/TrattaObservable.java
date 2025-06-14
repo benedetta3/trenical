@@ -53,9 +53,6 @@ public class TrattaObservable implements TrattaSubject {
 
         this.tratta = this.tratta.toBuilder().setStato(nuovoStato).build();
 
-        System.out.println("TrattaObservable: Cambio stato tratta ID " + tratta.getId() +
-                " da '" + vecchioStato + "' a '" + nuovoStato + "'");
-
         notifyObservers();
     }
 
@@ -63,16 +60,11 @@ public class TrattaObservable implements TrattaSubject {
     public void attach(TrattaObserver o) {
         if (!osservatori.contains(o)) {
             osservatori.add(o);
-            System.out.println("TrattaObservable: Aggiunto osservatore per tratta ID " + tratta.getId() +
-                    " - Totale osservatori: " + osservatori.size());
         }
     }
 
     @Override
     public void notifyObservers() {
-        System.out.println("TrattaObservable: Notificando " + osservatori.size() +
-                " osservatori per tratta ID " + tratta.getId());
-
         for (TrattaObserver o : osservatori) {
             try {
                 o.update(tratta);

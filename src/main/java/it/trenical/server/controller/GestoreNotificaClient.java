@@ -23,7 +23,6 @@ public class GestoreNotificaClient implements Gestore {
 
         if (cliente.getIsFedelta() && cliente.getRiceviPromo()) {
             NotificationDispatcher.getInstance().registraPerPromozioni(email, new ClienteOsservatore(cliente));
-            System.out.println("Cliente " + email + " registrato per ricevere promozioni FedeltàTreno");
         }
 
         List<String> notifiche = ClienteOsservatore.recuperaNotifiche(email);

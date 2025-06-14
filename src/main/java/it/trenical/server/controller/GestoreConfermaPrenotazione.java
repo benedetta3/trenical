@@ -34,9 +34,12 @@ public class GestoreConfermaPrenotazione implements Gestore {
         List<PromozioneDTO> promozioniApplicate = new ArrayList<>();
 
         for (PromozioneDTO promo : DatabasePromozioni.getInstance().getTutteLePromozioni()) {
-            PromozioneStrategy strategia = PromozioneStrategyFactory.getInstance().selezionaStrategia(promo, tratta, cliente);
+            PromozioneStrategy strategia = PromozioneStrategyFactory.getInstance()
+                    .selezionaStrategia(promo, tratta, cliente);
             if (strategia.isApplicabile(tratta, cliente)) {
-                prezzoFinale = strategia.calcolaPrezzo(tratta);
+                // Applico cumulativamente: aggiorno la tratta temporanea col prezzo attuale
+                TrattaDTO trattaTemp = TrattaDTO.newBuilder(tratta).setPrezzo(prezzoFinale).build();
+                prezzoFinale = strategia.calcolaPrezzo(trattaTemp); // ✅ calcolo su prezzo corrente
                 promozioniApplicate.add(promo);
             }
         }

@@ -200,11 +200,9 @@ public class MenuPrincipale extends JFrame {
                     observer = new SimpleNotificationObserver(email);
 
                     NotificationDispatcher.getInstance().registra(email, observer);
-                    System.out.println("Client " + email + " registrato per notifiche automatiche");
 
                     if (isFedelta && riceviPromo) {
                         NotificationDispatcher.getInstance().registraPerPromozioni(email, observer);
-                        System.out.println("Client " + email + " registrato per promozioni FedeltàTreno");
                     }
 
                     break;

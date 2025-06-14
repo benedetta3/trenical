@@ -36,7 +36,6 @@ public class NotificationDispatcher {
         if (o != null) {
             o.aggiorna(messaggio);
         }
-        System.out.println("Notifica a " + email + ": " + messaggio);
     }
 
     public Set<String> getClientiRegistrati() {
@@ -48,17 +47,13 @@ public class NotificationDispatcher {
     }
 
     public void notificaNuovaPromozioneFedelta(PromozioneDTO promo) {
-        System.out.println("Inizio invio promozione a " + observersPromo.size() + " clienti");
-
         for (Map.Entry<String, NotificationObserver> entry : observersPromo.entrySet()) {
             String email = entry.getKey();
             NotificationObserver observer = entry.getValue();
 
             if (observer != null) {
-                System.out.println("Inoltro promozione a " + email);
                 observer.aggiornaPromozione(promo);
             } else {
-                System.out.println("Observer null per " + email);
                 ClienteOsservatore.inviaNotificaPromozione(email, promo.getDescrizione());
             }
         }

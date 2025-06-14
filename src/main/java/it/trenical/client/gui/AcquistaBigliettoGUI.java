@@ -242,8 +242,6 @@ public class AcquistaBigliettoGUI extends JFrame {
 
         riepilogo.append("\nTotale pagato: €").append(String.format("%.2f", prezzoTotale));
 
-        System.out.println("Client " + clienteAutenticato.getEmail() + " registrato automaticamente per notifiche");
-
         int scelta = JOptionPane.showConfirmDialog(this,
                 "Vuoi ricevere aggiornamenti in tempo reale su questa tratta?",
                 "Iscrizione a notifiche",

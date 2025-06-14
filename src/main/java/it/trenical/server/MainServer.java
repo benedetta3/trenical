@@ -17,20 +17,7 @@ public class MainServer {
         boolean testMode = Boolean.parseBoolean(System.getProperty("testMode", "false"));
 
         if (!testMode) {
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try (
-                        BufferedReader reader = new BufferedReader(new FileReader("tratte_originale.txt"));
-                        BufferedWriter writer = new BufferedWriter(new FileWriter("tratte.txt"))
-                ) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        writer.write(line);
-                        writer.newLine();
-                    }
-                } catch (IOException e) {
-                    System.err.println("Errore nel ripristino di tratte.txt: " + e.getMessage());
-                }
-            }));
+            ripristinaFileTratte();
         }
 
         try {
@@ -56,6 +43,21 @@ public class MainServer {
 
         } catch (IOException | InterruptedException e) {
             System.err.println("Errore nell'avvio del server: " + e.getMessage());
+        }
+    }
+
+    private static void ripristinaFileTratte() {
+        try (
+                BufferedReader reader = new BufferedReader(new FileReader("tratte_originale.txt"));
+                BufferedWriter writer = new BufferedWriter(new FileWriter("tratte.txt"))
+        ) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                writer.write(line);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Errore nel ripristino di tratte.txt: " + e.getMessage());
         }
     }
 }
