@@ -5,9 +5,6 @@ import it.trenical.server.controller.Gestore;
 import it.trenical.server.factory.GestoreFactory;
 import io.grpc.stub.StreamObserver;
 
-/**
- * Implementazione del servizio Trenical definito nel file proto.
- */
 
 public class TrenicalImpl extends TrenicalServiceGrpc.TrenicalServiceImplBase {
 

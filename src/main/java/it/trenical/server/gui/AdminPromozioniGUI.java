@@ -101,10 +101,8 @@ public class AdminPromozioniGUI extends JFrame {
                 .setSoloFedelta(soloFedelta)
                 .build();
 
-        //Aggiorna solo in memoria
         DatabasePromozioni.getInstance().aggiungiPromozione(nuovaPromo);
 
-        //Notifica solo ai membri FedeltàTreno che hanno accettato
         NotificationDispatcher.getInstance().notificaNuovaPromozioneFedelta(nuovaPromo);
 
         JOptionPane.showMessageDialog(this, "Promozione aggiunta.");

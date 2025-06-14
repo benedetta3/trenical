@@ -29,7 +29,7 @@ public class GestoreConfermaPrenotazioneTest {
         gestore = new GestoreConfermaPrenotazione();
         DatabasePrenotazioni.getInstance().reset();
         DatabaseBiglietti.getInstance().reset();
-        DatabasePromozioni.getInstance().reset(); // se vuoi evitare promozioni nei test
+        DatabasePromozioni.getInstance().reset();
 
         cliente = ClienteDTO.newBuilder()
                 .setId(1)
@@ -123,10 +123,9 @@ public class GestoreConfermaPrenotazioneTest {
     @Test
     @Order(4)
     public void testConcorrenzaSuConfermaPrenotazioni() throws InterruptedException {
-        int numeroPrenotazioni = 5; // posti disponibili nella tratta
+        int numeroPrenotazioni = 5;
         int tentativi = 10;
 
-        // Preparazione prenotazioni concorrenti
         for (int i = 0; i < numeroPrenotazioni; i++) {
             ClienteDTO clienteTemp = ClienteDTO.newBuilder()
                     .setId(100 + i)
@@ -152,7 +151,7 @@ public class GestoreConfermaPrenotazioneTest {
         AtomicInteger fallimenti = new AtomicInteger();
 
         for (int i = 0; i < tentativi; i++) {
-            int idPrenotazione = 9000 + (i % numeroPrenotazioni); // Alcuni thread useranno stesse prenotazioni
+            int idPrenotazione = 9000 + (i % numeroPrenotazioni);
 
             executor.submit(() -> {
                 RichiestaDTO richiesta = RichiestaDTO.newBuilder()
@@ -177,7 +176,6 @@ public class GestoreConfermaPrenotazioneTest {
         System.out.println("Conferme riuscite: " + successi.get());
         System.out.println("Conferme fallite: " + fallimenti.get());
 
-        // Solo 5 conferme possono riuscire, massimo 5 biglietti presenti nel DB
         assertEquals(numeroPrenotazioni, successi.get(), "Devono essere riuscite solo " + numeroPrenotazioni + " conferme.");
     }
 }

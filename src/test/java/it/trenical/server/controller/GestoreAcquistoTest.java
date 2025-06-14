@@ -184,11 +184,10 @@ public class GestoreAcquistoTest {
     @Test
     @Order(7)
     public void testConcorrenzaSuPostiDisponibili() throws InterruptedException {
-        // Imposta 3 posti disponibili
         tratta = TrattaDTO.newBuilder(tratta).setPostiDisponibili(3).build();
         DatabaseTratte.getInstance().aggiornaTratta(tratta);
 
-        int numClienti = 10; // 10 tentativi di acquisto concorrenti
+        int numClienti = 10;
         Thread[] threads = new Thread[numClienti];
         RispostaDTO[] risposte = new RispostaDTO[numClienti];
 

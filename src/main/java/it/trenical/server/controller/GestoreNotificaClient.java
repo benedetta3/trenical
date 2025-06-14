@@ -21,21 +21,20 @@ public class GestoreNotificaClient implements Gestore {
 
         String email = cliente.getEmail();
 
-        //REGISTRA IL CLIENTE NEL DISPATCHER SERVER LATO PROMOZIONI
         if (cliente.getIsFedelta() && cliente.getRiceviPromo()) {
             NotificationDispatcher.getInstance().registraPerPromozioni(email, new ClienteOsservatore(cliente));
             System.out.println("Cliente " + email + " registrato per ricevere promozioni FedeltàTreno");
         }
 
-        List<String> notifichePending = ClienteOsservatore.recuperaNotifiche(email);
+        List<String> notifiche = ClienteOsservatore.recuperaNotifiche(email);
 
         RispostaDTO.Builder risposta = RispostaDTO.newBuilder().setEsito(true);
 
-        if (notifichePending.isEmpty()) {
-            risposta.setMessaggio("Nessuna notifica pending");
+        if (notifiche.isEmpty()) {
+            risposta.setMessaggio("Nessuna notifica");
         } else {
-            risposta.setMessaggio("Notifiche trovate: " + notifichePending.size());
-            for (String messaggio : notifichePending) {
+            risposta.setMessaggio("Notifiche trovate: " + notifiche.size());
+            for (String messaggio : notifiche) {
                 NotificaDTO notifica = NotificaDTO.newBuilder()
                         .setEmail(email)
                         .setMessaggio(messaggio)
@@ -44,7 +43,6 @@ public class GestoreNotificaClient implements Gestore {
                 risposta.addNotifiche(notifica);
             }
         }
-
         return risposta.build();
     }
 }

@@ -153,7 +153,6 @@ public class GestorePrenotazioneTest {
     @Test
     @Order(6)
     public void testConcorrenzaSuPostiDisponibili() throws InterruptedException {
-        // Imposta solo 3 posti disponibili
         TrattaDTO trattaLimitata = TrattaDTO.newBuilder(tratta).setPostiDisponibili(3).build();
         DatabaseTratte.getInstance().aggiornaTratta(trattaLimitata);
 

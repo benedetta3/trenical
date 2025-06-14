@@ -87,7 +87,6 @@ public class DatabasePrenotazioniTest {
         assertEquals(1, db.generaNuovoId());
     }
 
-    // --- Utility ---
     private ClienteDTO creaCliente(int id, String email) {
         return ClienteDTO.newBuilder()
                 .setId(id)

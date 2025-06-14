@@ -15,7 +15,7 @@ public class DatabaseTratteTest {
     @BeforeEach
     public void setup() {
         db = DatabaseTratte.getInstance();
-        db.reset(); // azzera per ogni test
+        db.reset();
     }
 
     @Test
@@ -88,7 +88,6 @@ public class DatabaseTratteTest {
         assertEquals(3, ottenuta.getBinario());
     }
 
-    // Metodo di utilità per creare una tratta fittizia
     private TrattaDTO creaTratta(int id) {
         return TrattaDTO.newBuilder()
                 .setId(id)

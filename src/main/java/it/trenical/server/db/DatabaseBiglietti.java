@@ -67,7 +67,6 @@ public class DatabaseBiglietti {
         for (BigliettoDTO b : biglietti) {
             if (b.hasCliente() && b.getCliente().getEmail().equalsIgnoreCase(cliente.getEmail())) {
                 TrattaDTO trattaCompleta = dbTratte.getTratta(b.getTratta().getId());
-                // Ricostruzione del biglietto con tratta aggiornata
                 BigliettoDTO aggiornato = BigliettoDTO.newBuilder(b)
                         .setTratta(trattaCompleta)
                         .build();

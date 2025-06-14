@@ -27,7 +27,7 @@ public class AltaVelocitaEstateStrategyTest {
     @Test
     public void testNonApplicabileFuoriPeriodo() {
         TrattaDTO tratta = TrattaDTO.newBuilder()
-                .setData("2024-12-01") // dicembre
+                .setData("2024-12-01")
                 .setTipoTreno("Alta Velocità")
                 .setPrezzo(100.0)
                 .build();
@@ -40,8 +40,8 @@ public class AltaVelocitaEstateStrategyTest {
     @Test
     public void testNonApplicabileTipoTrenoErrato() {
         TrattaDTO tratta = TrattaDTO.newBuilder()
-                .setData("2024-07-10") // luglio (valido)
-                .setTipoTreno("Regionale") // tipo errato
+                .setData("2024-07-10")
+                .setTipoTreno("Regionale")
                 .setPrezzo(100.0)
                 .build();
 

@@ -17,7 +17,7 @@ public class GestoreNotificaClientTest {
     public void setUp() {
         resetTratteFile();
         gestore = new GestoreNotificaClient();
-        ClienteOsservatore.resetNotifiche(); // pulizia notifiche prima di ogni test
+        ClienteOsservatore.resetNotifiche();
     }
 
     private void resetTratteFile() {

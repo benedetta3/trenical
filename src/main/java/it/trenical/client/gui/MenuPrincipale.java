@@ -23,7 +23,6 @@ public class MenuPrincipale extends JFrame {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLayout(new BorderLayout());
 
-        // Pannello superiore
         JPanel topPanel = new JPanel(new BorderLayout());
         JLabel imgLabel = new JLabel(new ImageIcon("Immagine1.jpg"));
         imgLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -195,14 +194,11 @@ public class MenuPrincipale extends JFrame {
                             .setRiceviPromo(riceviPromo)
                             .build();
 
-                    // Notifica client al server
                     NotificaClientCommand notificaCmd = new NotificaClientCommand(clienteAutenticato);
                     CommandInvoker.getInstance().esegui(notificaCmd);
 
-                    // Crea observer
                     observer = new SimpleNotificationObserver(email);
 
-                    // Registrazione client per notifiche
                     NotificationDispatcher.getInstance().registra(email, observer);
                     System.out.println("Client " + email + " registrato per notifiche automatiche");
 

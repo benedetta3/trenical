@@ -48,7 +48,7 @@ public class GestoreVisualizzaBigliettiTest {
     @Test
     @Order(1)
     public void testClienteNonSpecificato() {
-        RichiestaDTO richiesta = RichiestaDTO.newBuilder().build(); // cliente mancante
+        RichiestaDTO richiesta = RichiestaDTO.newBuilder().build();
 
         RispostaDTO risposta = gestore.gestisci(richiesta);
 

@@ -17,7 +17,6 @@ public class MainServer {
         boolean testMode = Boolean.parseBoolean(System.getProperty("testMode", "false"));
 
         if (!testMode) {
-            //Ripristinare il file originale alla chiusura
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try (
                         BufferedReader reader = new BufferedReader(new FileReader("tratte_originale.txt"));

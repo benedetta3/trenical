@@ -195,7 +195,6 @@ public class FinestraFiltraPerPrenotazione extends JFrame {
         JOptionPane.showMessageDialog(this,
                 "Prenotazioni completate con successo.\nNumero prenotazioni: " + idPrenotazioni.size());
 
-        //Popup iscrizione a notifiche subito dopo la prenotazione
         int scelta = JOptionPane.showConfirmDialog(this,
                 "Vuoi ricevere aggiornamenti in tempo reale su questa tratta prenotata?",
                 "Iscrizione a notifiche",

@@ -39,7 +39,6 @@ public class DatabasePromozioniTest {
         assertEquals(2, lista.size());
     }
 
-    // --- Metodo di supporto ---
     private PromozioneDTO creaPromozione(String descrizione, double sconto, boolean soloFedelta, String strategy) {
         return PromozioneDTO.newBuilder()
                 .setDescrizione(descrizione)

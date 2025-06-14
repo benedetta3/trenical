@@ -15,7 +15,7 @@ public class DatabaseTratte {
 
     private final List<TrattaDTO> tratte = new ArrayList<>();
     private final Map<Integer, TrattaObservable> tratteOsservabili = new HashMap<>();
-    private boolean persistenzaAttiva = true; // di default attiva
+    private boolean persistenzaAttiva = true;
 
     private DatabaseTratte() {}
 
@@ -114,7 +114,6 @@ public class DatabaseTratte {
             ClienteDTO cliente = b.getCliente();
             String email = cliente.getEmail();
 
-            //Se già notificato, salta
             if (!emailNotificate.add(email)) continue;
 
             String stato = nuovaTratta.getStato().toLowerCase(Locale.ROOT);
@@ -146,7 +145,6 @@ public class DatabaseTratte {
             NotificationDispatcher.getInstance().notifica(email, messaggio.toString());
         }
 
-        // Aggiorna tutti i biglietti (anche se non notificati, per sincronizzare i dati)
         for (BigliettoDTO b : biglietti) {
             BigliettoDTO aggiornato = BigliettoDTO.newBuilder(b)
                     .setTratta(nuovaTratta)

@@ -22,7 +22,6 @@ public class PromozioneStrategyFactory {
             String nomeClasse = promo.getClasseStrategy().trim();
 
             if (nomeClasse.isEmpty()) {
-                // Strategia predefinita per promozioni dinamiche
                 return new ScontoPercentualeStrategy(promo);
             }
 

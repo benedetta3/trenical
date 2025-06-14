@@ -82,12 +82,4 @@ public class TrattaObservable implements TrattaSubject {
             }
         }
     }
-
-    public boolean hasObservers() {
-        return !osservatori.isEmpty();
-    }
-
-    public int getObserverCount() {
-        return osservatori.size();
-    }
 }

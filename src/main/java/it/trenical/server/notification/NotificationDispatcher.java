@@ -12,8 +12,8 @@ public class NotificationDispatcher {
 
     private static NotificationDispatcher instance;
 
-    private final Map<String, NotificationObserver> osservatori;      // notifica tratte
-    private final Map<String, NotificationObserver> observersPromo;   // notifica promozioni
+    private final Map<String, NotificationObserver> osservatori;
+    private final Map<String, NotificationObserver> observersPromo;
 
     private NotificationDispatcher() {
         osservatori = new HashMap<>();
@@ -27,7 +27,6 @@ public class NotificationDispatcher {
         return instance;
     }
 
-    // Notifica aggiornamento tratta
     public void registra(String email, NotificationObserver osservatore) {
         osservatori.putIfAbsent(email, osservatore);
     }

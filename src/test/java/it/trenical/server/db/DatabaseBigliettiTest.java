@@ -17,7 +17,7 @@ public class DatabaseBigliettiTest {
     @BeforeEach
     public void setup() {
         db = DatabaseBiglietti.getInstance();
-        db.reset(); // svuota tutto prima di ogni test
+        db.reset();
     }
 
     @Test

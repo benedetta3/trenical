@@ -26,7 +26,6 @@ public class AdminTratteGUI extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        // --- TABELLA TRATTE ---
         String[] colonne = {"ID", "Partenza", "Arrivo", "Orario Partenza", "Orario Arrivo", "Binario", "Stato"};
         DefaultTableModel modelloTabella = new DefaultTableModel(colonne, 0) {
             public boolean isCellEditable(int row, int column) {
@@ -49,9 +48,8 @@ public class AdminTratteGUI extends JFrame {
 
         tabellaTratte = new JTable(modelloTabella);
         JScrollPane scrollPane = new JScrollPane(tabellaTratte);
-        scrollPane.setPreferredSize(new Dimension(850, 250)); // limita altezza tabella
+        scrollPane.setPreferredSize(new Dimension(850, 250));
 
-        // --- FORM DI MODIFICA ---
         JPanel panel = new JPanel(new GridLayout(6, 2, 5, 5));
 
         panel.add(new JLabel("ID Tratta:"));
@@ -94,11 +92,10 @@ public class AdminTratteGUI extends JFrame {
             binarioField.setEnabled(!cancellato);
         });
 
-        // --- COMPOSIZIONE LAYOUT ---
         JPanel contenitore = new JPanel();
         contenitore.setLayout(new BoxLayout(contenitore, BoxLayout.Y_AXIS));
         contenitore.add(scrollPane);
-        contenitore.add(Box.createVerticalStrut(20)); // spaziatura
+        contenitore.add(Box.createVerticalStrut(20));
         contenitore.add(panel);
 
         add(contenitore);
@@ -174,6 +171,6 @@ public class AdminTratteGUI extends JFrame {
 
         JOptionPane.showMessageDialog(this, "Tratta aggiornata con successo!");
         dispose();
-        new AdminTratteGUI(); // ricarica la GUI con la tabella aggiornata
+        new AdminTratteGUI();
     }
 }

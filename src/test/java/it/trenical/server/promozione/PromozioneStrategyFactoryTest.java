@@ -17,7 +17,7 @@ public class PromozioneStrategyFactoryTest {
                 .setDescrizione("Promo base")
                 .setSconto(10.0)
                 .setSoloFedelta(false)
-                .setClasseStrategy("") // importante
+                .setClasseStrategy("")
                 .build();
 
         TrattaDTO tratta = TrattaDTO.newBuilder()
@@ -63,7 +63,7 @@ public class PromozioneStrategyFactoryTest {
                 .setDescrizione("Errore strategy")
                 .setSconto(5.0)
                 .setSoloFedelta(false)
-                .setClasseStrategy("StrategiaInventata") // inesistente
+                .setClasseStrategy("StrategiaInventata")
                 .build();
 
         TrattaDTO tratta = TrattaDTO.newBuilder().build();

@@ -17,7 +17,7 @@ public class GestoreVisualizzaPromozioniTest {
     public void setUp() {
         resetTratteFile();
         gestore = new GestoreVisualizzaPromozioni();
-        DatabasePromozioni.getInstance().reset(); // pulizia corretta
+        DatabasePromozioni.getInstance().reset();
     }
 
     private void resetTratteFile() {

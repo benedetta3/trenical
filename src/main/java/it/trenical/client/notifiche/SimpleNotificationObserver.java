@@ -27,14 +27,13 @@ public class SimpleNotificationObserver implements NotificationObserver {
                 "Descrizione: " + promozione.getDescrizione() + "\n" +
                 "Sconto: " + promozione.getSconto() + "%";
 
-        aggiorna(messaggio); // riusa il sistema già in coda, evita duplicati e mostra popup custom
+        aggiorna(messaggio);
     }
-
 
     @Override
     public void aggiorna(String messaggio) {
         synchronized (codaNotifiche) {
-            if (notificheMostrate.contains(messaggio)) return; // evita duplicati
+            if (notificheMostrate.contains(messaggio)) return;
             notificheMostrate.add(messaggio);
             codaNotifiche.add(messaggio);
             if (!isShowing) {
@@ -121,7 +120,6 @@ public class SimpleNotificationObserver implements NotificationObserver {
         return "<html><body style='font-family:Segoe UI; font-size:13px; text-align:justify; color:#333333;'>" + html.replace("\n", "<br>") + "</body></html>";
     }
 
-    // Pannello con bordi stondati
     static class RoundedPanel extends JPanel {
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);

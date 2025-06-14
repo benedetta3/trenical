@@ -173,7 +173,6 @@ public class GestionePrenotazioniGUI extends JFrame {
         JOptionPane.showMessageDialog(this, messaggio.toString(), "Prenotazione Confermata", JOptionPane.INFORMATION_MESSAGE);
         caricaPrenotazioni();
 
-        // Registrazione osservatore solo se non già presente
         if (!NotificationDispatcher.getInstance().getClientiRegistrati().contains(cliente.getEmail())) {
             int sceltaNotifica = JOptionPane.showConfirmDialog(this,
                     "Vuoi ricevere aggiornamenti in tempo reale su questa tratta?",

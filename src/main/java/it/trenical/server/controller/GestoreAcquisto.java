@@ -50,7 +50,6 @@ public class GestoreAcquisto implements Gestore {
                     .build();
         }
 
-        // Decremento posti
         TrattaDTO trattaAggiornata = TrattaDTO.newBuilder(trattaSalvata)
                 .setPostiDisponibili(trattaSalvata.getPostiDisponibili() - 1)
                 .build();

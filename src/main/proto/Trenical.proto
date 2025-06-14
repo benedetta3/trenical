@@ -84,7 +84,6 @@ message RispostaDTO {
   repeated NotificaDTO notifiche = 6;
 }
 
-// SERVIZIO
 service TrenicalService {
   rpc inviaRichiesta (RichiestaDTO) returns (RispostaDTO);
 }

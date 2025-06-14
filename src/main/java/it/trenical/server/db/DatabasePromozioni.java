@@ -58,12 +58,6 @@ public class DatabasePromozioni {
 
     public void aggiungiPromozione(PromozioneDTO promo) {
         lista.add(promo);
-        // Nessuna scrittura su file
-    }
-
-    public void ricarica() {
-        lista.clear();
-        caricaDaFile("promozioni.txt");
     }
 
     public void reset() {

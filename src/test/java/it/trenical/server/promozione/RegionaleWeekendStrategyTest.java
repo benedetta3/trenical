@@ -12,11 +12,11 @@ public class RegionaleWeekendStrategyTest {
 
     private final PromozioneStrategy strategy = new RegionaleWeekendStrategy();
 
-    private final ClienteDTO cliente = ClienteDTO.newBuilder().build(); // il cliente non è rilevante
+    private final ClienteDTO cliente = ClienteDTO.newBuilder().build();
 
     @Test
     public void testApplicabileSabato() {
-        LocalDate sabato = LocalDate.of(2024, 6, 22); // sabato
+        LocalDate sabato = LocalDate.of(2024, 6, 22);
         TrattaDTO tratta = TrattaDTO.newBuilder()
                 .setTipoTreno("Regionale")
                 .setData(sabato.toString())
@@ -29,7 +29,7 @@ public class RegionaleWeekendStrategyTest {
 
     @Test
     public void testApplicabileDomenica() {
-        LocalDate domenica = LocalDate.of(2024, 6, 23); // domenica
+        LocalDate domenica = LocalDate.of(2024, 6, 23);
         TrattaDTO tratta = TrattaDTO.newBuilder()
                 .setTipoTreno("Regionale")
                 .setData(domenica.toString())
@@ -40,7 +40,7 @@ public class RegionaleWeekendStrategyTest {
 
     @Test
     public void testNonApplicabileLunedi() {
-        LocalDate lunedi = LocalDate.of(2024, 6, 24); // lunedì
+        LocalDate lunedi = LocalDate.of(2024, 6, 24);
         TrattaDTO tratta = TrattaDTO.newBuilder()
                 .setTipoTreno("Regionale")
                 .setData(lunedi.toString())
@@ -53,7 +53,7 @@ public class RegionaleWeekendStrategyTest {
     public void testNonApplicabileTrenoDiverso() {
         TrattaDTO tratta = TrattaDTO.newBuilder()
                 .setTipoTreno("Frecciarossa")
-                .setData("2024-06-22") // sabato ma tipo sbagliato
+                .setData("2024-06-22")
                 .build();
 
         assertFalse(strategy.isApplicabile(tratta, cliente));

@@ -37,7 +37,6 @@ public class GestoreModificaTest {
                 .setEmail("luca@bianchi.it")
                 .build();
 
-        // Tratta originale
         trattaOriginale = TrattaDTO.newBuilder()
                 .setId(10)
                 .setStazionePartenza("Roma")
@@ -53,7 +52,6 @@ public class GestoreModificaTest {
                 .setStato("regolare")
                 .build();
 
-        // Tratta nuova per modifica
         trattaNuova = TrattaDTO.newBuilder()
                 .setId(20)
                 .setStazionePartenza("Roma")
@@ -83,7 +81,7 @@ public class GestoreModificaTest {
 
         DatabaseBiglietti.getInstance().aggiungiBiglietto(bigliettoOriginale);
 
-        SimulatorePagamento.simulaAutorizzazione(true); // sempre true per test
+        SimulatorePagamento.simulaAutorizzazione(true);
     }
 
     private void resetTratteFile() {
@@ -159,17 +157,15 @@ public class GestoreModificaTest {
         DatabaseBiglietti.getInstance().reset();
         SimulatorePagamento.simulaAutorizzazione(true);
 
-        // Tratta iniziale per tutti
         TrattaDTO trattaIniziale = TrattaDTO.newBuilder(trattaOriginale)
                 .setId(10)
                 .setPostiDisponibili(100)
                 .build();
         DatabaseTratte.getInstance().aggiungiTratta(trattaIniziale);
 
-        // Tratta nuova con posti limitati
         TrattaDTO trattaLimitata = TrattaDTO.newBuilder(trattaNuova)
                 .setId(20)
-                .setPostiDisponibili(3) // Solo 3 posti!
+                .setPostiDisponibili(3)
                 .build();
         DatabaseTratte.getInstance().aggiungiTratta(trattaLimitata);
 
